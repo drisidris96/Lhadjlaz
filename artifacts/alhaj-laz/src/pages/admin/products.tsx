@@ -22,10 +22,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Search, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Package, Upload, Loader2 } from "lucide-react";
 import { formatDZD } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { Product } from "@workspace/api-client-react/generated";
+import { useUpload } from "@workspace/object-storage-web";
+import { useRef } from "react";
 
 const productSchema = z.object({
   name: z.string().min(2, "اسم المنتج مطلوب"),
@@ -98,6 +100,28 @@ export default function AdminProducts() {
       }
     }
   });
+
+  const fileInputAddRef = useRef<HTMLInputElement>(null);
+  const fileInputEditRef = useRef<HTMLInputElement>(null);
+
+  const { uploadFile, isUploading, progress } = useUpload({
+    onSuccess: (response) => {
+      const url = `/api/storage${response.objectPath}`;
+      form.setValue("imageUrl", url, { shouldDirty: true });
+      toast({ title: "تم رفع الصورة بنجاح" });
+    },
+    onError: () => {
+      toast({ variant: "destructive", title: "فشل رفع الصورة", description: "يرجى المحاولة مرة أخرى" });
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadFile(file);
+    }
+    e.target.value = "";
+  };
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -258,10 +282,43 @@ export default function AdminProducts() {
                     name="imageUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>رابط الصورة (اختياري)</FormLabel>
-                        <FormControl>
-                          <Input dir="ltr" className="text-left" placeholder="https://..." {...field} />
-                        </FormControl>
+                        <FormLabel>صورة المنتج</FormLabel>
+                        <div className="space-y-3">
+                          <input
+                            ref={fileInputAddRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileChange}
+                          />
+                          <div className="flex items-center gap-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => fileInputAddRef.current?.click()}
+                              disabled={isUploading}
+                              className="gap-2"
+                            >
+                              {isUploading ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  جاري الرفع... {progress}%
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="w-4 h-4" />
+                                  اختر صورة من الجهاز
+                                </>
+                              )}
+                            </Button>
+                            {field.value && (
+                              <img src={field.value} alt="معاينة" className="w-16 h-16 rounded-md object-cover border" />
+                            )}
+                          </div>
+                          <FormControl>
+                            <Input dir="ltr" className="text-left text-xs" placeholder="أو أدخل رابط الصورة..." {...field} />
+                          </FormControl>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -281,7 +338,7 @@ export default function AdminProducts() {
                     )}
                   />
                   
-                  <Button type="submit" className="w-full mt-6" disabled={createProduct.isPending}>
+                  <Button type="submit" className="w-full mt-6" disabled={createProduct.isPending || isUploading}>
                     {createProduct.isPending ? "جاري الحفظ..." : "حفظ المنتج"}
                   </Button>
                 </form>
@@ -378,10 +435,43 @@ export default function AdminProducts() {
                   name="imageUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>رابط الصورة (اختياري)</FormLabel>
-                      <FormControl>
-                        <Input dir="ltr" className="text-left" {...field} />
-                      </FormControl>
+                      <FormLabel>صورة المنتج</FormLabel>
+                      <div className="space-y-3">
+                        <input
+                          ref={fileInputEditRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleFileChange}
+                        />
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => fileInputEditRef.current?.click()}
+                            disabled={isUploading}
+                            className="gap-2"
+                          >
+                            {isUploading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                جاري الرفع... {progress}%
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4" />
+                                اختر صورة من الجهاز
+                              </>
+                            )}
+                          </Button>
+                          {field.value && (
+                            <img src={field.value} alt="معاينة" className="w-16 h-16 rounded-md object-cover border" />
+                          )}
+                        </div>
+                        <FormControl>
+                          <Input dir="ltr" className="text-left text-xs" placeholder="أو أدخل رابط الصورة..." {...field} />
+                        </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -401,7 +491,7 @@ export default function AdminProducts() {
                   )}
                 />
                 
-                <Button type="submit" className="w-full mt-6" disabled={updateProduct.isPending}>
+                <Button type="submit" className="w-full mt-6" disabled={updateProduct.isPending || isUploading}>
                   {updateProduct.isPending ? "جاري التحديث..." : "تحديث المنتج"}
                 </Button>
               </form>
