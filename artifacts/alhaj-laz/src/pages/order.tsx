@@ -31,6 +31,10 @@ export default function OrderPage() {
   const createOrder = useCreateOrder({
     mutation: {
       onSuccess: () => {
+        toast({
+          title: "تم إرسال طلبك بنجاح",
+          description: "سيتم التواصل معك قريباً لتأكيد الطلبية"
+        });
         setIsSuccess(true);
         window.scrollTo(0, 0);
       },
