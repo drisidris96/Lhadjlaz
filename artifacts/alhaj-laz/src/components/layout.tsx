@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { ShoppingBag, Search, Menu, X, User } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import logoUrl from "@assets/607425693_122184037190525400_7044830700338524128_n_1777454044692.jpg";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -18,10 +19,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/">
-              <div className="flex items-center gap-2 cursor-pointer">
-                <div className="w-10 h-10 bg-primary text-primary-foreground rounded-md flex items-center justify-center shadow-sm">
-                  <ShoppingBag className="w-6 h-6" />
-                </div>
+              <div className="flex items-center gap-3 cursor-pointer">
+                <img
+                  src={logoUrl}
+                  alt="الحاج لاز"
+                  className="w-12 h-12 rounded-full object-cover bg-black ring-2 ring-primary/30"
+                />
                 <span className="font-bold text-2xl tracking-tight text-foreground">الحاج لاز</span>
               </div>
             </Link>
@@ -81,10 +84,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <footer className="bg-secondary text-secondary-foreground py-12 mt-12 border-t-4 border-primary">
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-md flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5" />
-              </div>
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src={logoUrl}
+                alt="الحاج لاز"
+                className="w-10 h-10 rounded-full object-cover bg-black"
+              />
               <span className="font-bold text-xl">الحاج لاز</span>
             </div>
             <p className="text-secondary-foreground/70 mb-4 max-w-sm">
