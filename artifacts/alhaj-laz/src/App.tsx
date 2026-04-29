@@ -12,6 +12,7 @@ import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
 import AdminOrders from "@/pages/admin/orders";
+import AdminOrdersList from "@/pages/admin/orders-list";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/products" component={AdminProducts} />
       <Route path="/admin/orders" component={AdminOrders} />
+      <Route path="/admin/orders-list" component={AdminOrdersList} />
       <Route component={NotFound} />
     </Switch>
   );

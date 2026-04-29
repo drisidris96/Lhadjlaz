@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Package, ShoppingBag, LayoutDashboard, LogOut } from "lucide-react";
+import { Package, ShoppingBag, LayoutDashboard, LogOut, ListChecks } from "lucide-react";
 import { useAdminLogout } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <div className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors cursor-pointer ${location === "/admin/orders" ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}>
               <ShoppingBag className="w-5 h-5" />
               <span>الطلبات</span>
+            </div>
+          </Link>
+
+          <Link href="/admin/orders-list">
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors cursor-pointer ${location === "/admin/orders-list" ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}>
+              <ListChecks className="w-5 h-5" />
+              <span>قائمة الطلبات</span>
             </div>
           </Link>
         </nav>
