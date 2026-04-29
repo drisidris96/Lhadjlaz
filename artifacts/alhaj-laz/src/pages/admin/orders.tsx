@@ -9,7 +9,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingBag, Check, X, Inbox, Archive } from "lucide-react";
@@ -196,28 +195,28 @@ export default function AdminOrders() {
                         <td className="p-4 align-middle">
                           <div className="flex items-center gap-2">
                             <Button
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700 text-white h-8"
+                              size="default"
+                              className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold shadow-md hover:shadow-lg transition-all"
                               disabled={updateStatus.isPending}
                               onClick={() =>
                                 handleStatusChange(order.id, "confirmed")
                               }
                               data-testid={`button-accept-${order.id}`}
                             >
-                              <Check className="w-4 h-4 ml-1" />
+                              <Check className="w-5 h-5 ml-1" />
                               قبول
                             </Button>
                             <Button
-                              size="sm"
+                              size="default"
                               variant="destructive"
-                              className="h-8"
+                              className="font-bold shadow-md hover:shadow-lg transition-all"
                               disabled={updateStatus.isPending}
                               onClick={() =>
                                 handleStatusChange(order.id, "cancelled")
                               }
                               data-testid={`button-reject-${order.id}`}
                             >
-                              <X className="w-4 h-4 ml-1" />
+                              <X className="w-5 h-5 ml-1" />
                               رفض
                             </Button>
                           </div>
@@ -316,29 +315,46 @@ export default function AdminOrders() {
                           {order.quantity}
                         </td>
                         <td className="p-4 align-middle">
-                          <Select
-                            value={order.status}
-                            disabled={updateStatus.isPending}
-                            onValueChange={(val) =>
-                              handleStatusChange(order.id, val)
-                            }
-                          >
-                            <SelectTrigger
-                              className={`h-8 border-none text-xs font-medium w-[130px] ${getStatusBadgeClass(
-                                order.status,
-                              )}`}
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              disabled={
+                                updateStatus.isPending ||
+                                order.status === "confirmed"
+                              }
+                              onClick={() =>
+                                handleStatusChange(order.id, "confirmed")
+                              }
+                              className={
+                                order.status === "confirmed"
+                                  ? "bg-blue-600 text-white font-bold shadow cursor-default opacity-100 disabled:opacity-100"
+                                  : "bg-white border border-blue-600 text-blue-700 hover:bg-blue-50 font-medium shadow-sm"
+                              }
+                              data-testid={`button-set-confirmed-${order.id}`}
                             >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="confirmed">
-                                {ORDER_STATUS_ARABIC.confirmed}
-                              </SelectItem>
-                              <SelectItem value="cancelled">
-                                {ORDER_STATUS_ARABIC.cancelled}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                              <Check className="w-4 h-4 ml-1" />
+                              {ORDER_STATUS_ARABIC.confirmed}
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={
+                                updateStatus.isPending ||
+                                order.status === "cancelled"
+                              }
+                              onClick={() =>
+                                handleStatusChange(order.id, "cancelled")
+                              }
+                              className={
+                                order.status === "cancelled"
+                                  ? "bg-red-600 text-white font-bold shadow cursor-default opacity-100 disabled:opacity-100"
+                                  : "bg-white border border-red-600 text-red-700 hover:bg-red-50 font-medium shadow-sm"
+                              }
+                              data-testid={`button-set-cancelled-${order.id}`}
+                            >
+                              <X className="w-4 h-4 ml-1" />
+                              {ORDER_STATUS_ARABIC.cancelled}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
