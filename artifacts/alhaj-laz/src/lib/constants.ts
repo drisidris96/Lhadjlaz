@@ -6,6 +6,7 @@ export const ORDER_STATUS_ARABIC: Record<string, string> = {
   pending: "قيد الانتظار",
   confirmed: "مؤكد",
   shipped: "تم الشحن",
+  out_for_delivery: "قيد التسليم",
   delivered: "تم التسليم",
   cancelled: "ملغى",
 };

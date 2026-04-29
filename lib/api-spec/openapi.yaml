@@ -454,7 +454,7 @@ components:
           type: number
         status:
           type: string
-          enum: [pending, confirmed, shipped, delivered, cancelled]
+          enum: [pending, confirmed, shipped, out_for_delivery, delivered, cancelled]
         notes:
           type: string
         createdAt:
@@ -504,7 +504,7 @@ components:
       properties:
         status:
           type: string
-          enum: [pending, confirmed, shipped, delivered, cancelled]
+          enum: [pending, confirmed, shipped, out_for_delivery, delivered, cancelled]
       required:
         - status
 

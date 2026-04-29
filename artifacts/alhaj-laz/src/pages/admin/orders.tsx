@@ -68,6 +68,8 @@ export default function AdminOrders() {
         return "bg-blue-100 text-blue-800";
       case "shipped":
         return "bg-indigo-100 text-indigo-800";
+      case "out_for_delivery":
+        return "bg-purple-100 text-purple-800";
       case "delivered":
         return "bg-green-100 text-green-800";
       case "cancelled":
@@ -77,9 +79,46 @@ export default function AdminOrders() {
     }
   };
 
+  const PROCESSED_STATUSES = [
+    "confirmed",
+    "shipped",
+    "out_for_delivery",
+    "delivered",
+    "cancelled",
+  ] as const;
+
+  const STATUS_BUTTON_STYLES: Record<
+    string,
+    { active: string; inactive: string }
+  > = {
+    confirmed: {
+      active: "bg-blue-600 text-white",
+      inactive: "bg-white border border-blue-600 text-blue-700 hover:bg-blue-50",
+    },
+    shipped: {
+      active: "bg-indigo-600 text-white",
+      inactive:
+        "bg-white border border-indigo-600 text-indigo-700 hover:bg-indigo-50",
+    },
+    out_for_delivery: {
+      active: "bg-purple-600 text-white",
+      inactive:
+        "bg-white border border-purple-600 text-purple-700 hover:bg-purple-50",
+    },
+    delivered: {
+      active: "bg-green-600 text-white",
+      inactive:
+        "bg-white border border-green-600 text-green-700 hover:bg-green-50",
+    },
+    cancelled: {
+      active: "bg-red-600 text-white",
+      inactive: "bg-white border border-red-600 text-red-700 hover:bg-red-50",
+    },
+  };
+
   const pendingOrders = (orders ?? []).filter((o) => o.status === "pending");
-  const processedOrders = (orders ?? []).filter(
-    (o) => o.status === "confirmed" || o.status === "cancelled",
+  const processedOrders = (orders ?? []).filter((o) =>
+    (PROCESSED_STATUSES as readonly string[]).includes(o.status),
   );
 
   return (
@@ -315,45 +354,31 @@ export default function AdminOrders() {
                           {order.quantity}
                         </td>
                         <td className="p-4 align-middle">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              disabled={
-                                updateStatus.isPending ||
-                                order.status === "confirmed"
-                              }
-                              onClick={() =>
-                                handleStatusChange(order.id, "confirmed")
-                              }
-                              className={
-                                order.status === "confirmed"
-                                  ? "bg-blue-600 text-white font-bold shadow cursor-default opacity-100 disabled:opacity-100"
-                                  : "bg-white border border-blue-600 text-blue-700 hover:bg-blue-50 font-medium shadow-sm"
-                              }
-                              data-testid={`button-set-confirmed-${order.id}`}
-                            >
-                              <Check className="w-4 h-4 ml-1" />
-                              {ORDER_STATUS_ARABIC.confirmed}
-                            </Button>
-                            <Button
-                              size="sm"
-                              disabled={
-                                updateStatus.isPending ||
-                                order.status === "cancelled"
-                              }
-                              onClick={() =>
-                                handleStatusChange(order.id, "cancelled")
-                              }
-                              className={
-                                order.status === "cancelled"
-                                  ? "bg-red-600 text-white font-bold shadow cursor-default opacity-100 disabled:opacity-100"
-                                  : "bg-white border border-red-600 text-red-700 hover:bg-red-50 font-medium shadow-sm"
-                              }
-                              data-testid={`button-set-cancelled-${order.id}`}
-                            >
-                              <X className="w-4 h-4 ml-1" />
-                              {ORDER_STATUS_ARABIC.cancelled}
-                            </Button>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {PROCESSED_STATUSES.map((status) => {
+                              const isActive = order.status === status;
+                              const styles = STATUS_BUTTON_STYLES[status];
+                              return (
+                                <Button
+                                  key={status}
+                                  size="sm"
+                                  disabled={
+                                    updateStatus.isPending || isActive
+                                  }
+                                  onClick={() =>
+                                    handleStatusChange(order.id, status)
+                                  }
+                                  className={`font-medium shadow-sm whitespace-nowrap ${
+                                    isActive
+                                      ? `${styles.active} font-bold shadow cursor-default opacity-100 disabled:opacity-100`
+                                      : styles.inactive
+                                  }`}
+                                  data-testid={`button-set-${status}-${order.id}`}
+                                >
+                                  {ORDER_STATUS_ARABIC[status]}
+                                </Button>
+                              );
+                            })}
                           </div>
                         </td>
                       </tr>
