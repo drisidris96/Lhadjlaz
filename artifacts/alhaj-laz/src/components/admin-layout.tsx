@@ -12,7 +12,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     mutation: {
       onSuccess: () => {
         toast({ title: "تم تسجيل الخروج بنجاح" });
-        setLocation("/admin/login");
+        setLocation("/");
       },
     }
   });
