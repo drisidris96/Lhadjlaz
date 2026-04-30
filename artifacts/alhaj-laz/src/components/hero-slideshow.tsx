@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import kidsImg from "@assets/stock_images/kids_clothing.jpg";
-import womenImg from "@assets/stock_images/women_clothing.jpg";
-import menImg from "@assets/stock_images/men_clothing.jpg";
-import adultsImg from "@assets/stock_images/adults_clothing.jpg";
+import kidsImg from "@assets/stock_images/kids_clothing_only.jpg";
+import womenImg from "@assets/stock_images/women_clothing_only.jpg";
+import menImg from "@assets/stock_images/men_clothing_only.jpg";
+import adultsImg from "@assets/stock_images/adults_clothing_only.jpg";
 
 const slides = [
   { src: kidsImg, label: "ملابس الأطفال" },

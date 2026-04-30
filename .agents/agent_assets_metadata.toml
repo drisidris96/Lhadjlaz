@@ -24,3 +24,27 @@ id = "HPmUvxTVxKColiRoETd-n"
 uri = "file://attached_assets/stock_images/kids_clothing.jpg"
 type = "image"
 title = "children kids clothing fashion store colorful happy"
+
+[[outputs]]
+id = "iqPcHSnJfQSLLfyNrZazL"
+uri = "file://attached_assets/stock_images/kids_clothing_only.jpg"
+type = "image"
+title = "children kids clothing folded stacked on shelf no people clothing only"
+
+[[outputs]]
+id = "S7CjHra3cG4nm_M8Qzf-t"
+uri = "file://attached_assets/stock_images/men_clothing_only.jpg"
+type = "image"
+title = "men shirts clothing folded stacked on shelf no people clothing only product"
+
+[[outputs]]
+id = "p6dfjTVPR0OVqv0Dojtxh"
+uri = "file://attached_assets/stock_images/women_clothing_only.jpg"
+type = "image"
+title = "women dresses clothing folded on shelf hanging no people clothing only"
+
+[[outputs]]
+id = "CoNWdScdCewadC_i6zBvk"
+uri = "file://attached_assets/stock_images/adults_clothing_only.jpg"
+type = "image"
+title = "traditional abaya clothing fabric folded stacked no people product display"
