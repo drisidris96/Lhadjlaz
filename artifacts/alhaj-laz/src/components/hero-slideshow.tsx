@@ -26,7 +26,7 @@ export function HeroSlideshow() {
   const prev = () => setIndex((i) => (i - 1 + slides.length) % slides.length);
 
   return (
-    <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/10 bg-black/5">
+    <div className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-black/5">
       {slides.map((slide, i) => (
         <div
           key={slide.src}
