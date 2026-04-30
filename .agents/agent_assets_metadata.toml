@@ -1,0 +1,26 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "89h-M1p8BimgfcAC-CJY0"
+uri = "file://attached_assets/stock_images/men_clothing.jpg"
+type = "image"
+title = "men fashion clothing wholesale store collection shirts"
+
+[[outputs]]
+id = "wkFkT9pKIXU9OL2IrMd9w"
+uri = "file://attached_assets/stock_images/women_clothing.jpg"
+type = "image"
+title = "women fashion clothing collection elegant dresses wholesale"
+
+[[outputs]]
+id = "5BmDK9dqWGzpzcFBECfhV"
+uri = "file://attached_assets/stock_images/adults_clothing.jpg"
+type = "image"
+title = "elderly adults modest clothing collection traditional"
+
+[[outputs]]
+id = "HPmUvxTVxKColiRoETd-n"
+uri = "file://attached_assets/stock_images/kids_clothing.jpg"
+type = "image"
+title = "children kids clothing fashion store colorful happy"

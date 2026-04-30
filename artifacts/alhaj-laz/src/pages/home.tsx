@@ -5,6 +5,7 @@ import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HeroSlideshow } from "@/components/hero-slideshow";
 
 export default function Home() {
   const { data: products, isLoading } = useListProducts({});
@@ -16,25 +17,30 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative bg-primary overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-foreground/10 text-primary-foreground text-sm font-medium mb-6">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-              المورد الأول لتجار الملابس في الجزائر
+        <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-foreground/10 text-primary-foreground text-sm font-medium mb-6">
+                <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+                المورد الأول لتجار الملابس في الجزائر
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black text-primary-foreground leading-tight mb-6">
+                تسوق بالجملة بكل ثقة من <span className="text-accent">الحاج لاز</span>
+              </h1>
+              <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl leading-relaxed">
+                نوفر لك أفضل تشكيلات الملابس بجودة عالية وأسعار جملة منافسة. اطلب الآن ونصلك إلى أي ولاية في الجزائر.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/products">
+                  <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg h-14 px-8">
+                    تصفح المنتجات
+                    <ArrowLeft className="w-5 h-5 mr-2" />
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black text-primary-foreground leading-tight mb-6">
-              تسوق بالجملة بكل ثقة من <span className="text-accent">الحاج لاز</span>
-            </h1>
-            <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl leading-relaxed">
-              نوفر لك أفضل تشكيلات الملابس بجودة عالية وأسعار جملة منافسة. اطلب الآن ونصلك إلى أي ولاية في الجزائر.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/products">
-                <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg h-14 px-8">
-                  تصفح المنتجات
-                  <ArrowLeft className="w-5 h-5 mr-2" />
-                </Button>
-              </Link>
+            <div className="w-full max-w-xl mx-auto lg:mx-0 lg:justify-self-end">
+              <HeroSlideshow />
             </div>
           </div>
         </div>
