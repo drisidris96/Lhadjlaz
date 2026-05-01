@@ -35,7 +35,7 @@ const productSchema = z.object({
   price: z.coerce.number().min(1, "السعر يجب أن يكون أكبر من 0"),
   category: z.string().min(2, "التصنيف مطلوب"),
   imageUrl: z.string().optional(),
-  minOrderQty: z.coerce.number().min(6, "الحد الأدنى للكمية هو 6 قطع"),
+  minOrderQty: z.coerce.number().min(1, "الحد الأدنى للكمية هو 1 قطعة"),
   stock: z.coerce.number().min(0, "المخزون لا يمكن أن يكون سالباً")
 });
 
@@ -131,7 +131,7 @@ export default function AdminProducts() {
       price: 0,
       category: "",
       imageUrl: "",
-      minOrderQty: 6,
+      minOrderQty: 1,
       stock: 0
     }
   });
@@ -155,7 +155,7 @@ export default function AdminProducts() {
         price: 0,
         category: "",
         imageUrl: "",
-        minOrderQty: 6,
+        minOrderQty: 1,
         stock: 0
       });
     }

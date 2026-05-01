@@ -9,7 +9,7 @@ export const productsTable = pgTable("products", {
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   category: text("category").notNull(),
   imageUrl: text("image_url"),
-  minOrderQty: integer("min_order_qty").notNull().default(6),
+  minOrderQty: integer("min_order_qty").notNull().default(1),
   stock: integer("stock").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
