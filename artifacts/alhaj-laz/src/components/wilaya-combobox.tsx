@@ -36,7 +36,10 @@ export function WilayaCombobox({ value, onChange }: WilayaComboboxProps) {
           className="h-11 border-0 bg-transparent pr-9 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
         />
       </div>
-      <div>
+      <div
+        className="max-h-[280px] overflow-y-scroll"
+        style={{ touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
+      >
         {filtered.length === 0 ? (
           <div className="px-4 py-6 text-center text-sm text-muted-foreground">
             لا توجد ولاية مطابقة
