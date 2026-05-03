@@ -1,96 +1,76 @@
-import { useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
 import { ALGERIAN_WILAYAS } from "@/lib/constants";
 
 interface WilayaComboboxProps {
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
 }
 
-export function WilayaCombobox({
-  value,
-  onChange,
-  placeholder = "اختر الولاية",
-}: WilayaComboboxProps) {
-  const [open, setOpen] = useState(false);
+export function WilayaCombobox({ value, onChange }: WilayaComboboxProps) {
+  const [query, setQuery] = useState("");
 
-  const selectedIndex = ALGERIAN_WILAYAS.findIndex((w) => w === value);
-  const displayLabel =
-    selectedIndex >= 0 ? `${selectedIndex + 1} - ${ALGERIAN_WILAYAS[selectedIndex]}` : "";
+  const filtered = useMemo(() => {
+    const q = query.trim();
+    const items = ALGERIAN_WILAYAS.map((name, idx) => ({ name, idx }));
+    if (!q) return items;
+    const startsWith = items.filter((it) => it.name.startsWith(q));
+    const includes = items.filter(
+      (it) => !it.name.startsWith(q) && it.name.includes(q),
+    );
+    return [...startsWith, ...includes];
+  }, [query]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            "h-12 w-full justify-between bg-muted/50 px-3 text-base font-normal",
-            !value && "text-muted-foreground",
-          )}
-          data-testid="wilaya-trigger"
-        >
-          <span className="truncate text-right">{displayLabel || placeholder}</span>
-          <ChevronDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-[--radix-popover-trigger-width] p-0"
-        align="start"
-        sideOffset={4}
+    <div className="rounded-md border border-input bg-muted/50 overflow-hidden">
+      <div className="relative border-b border-input bg-background">
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Input
+          type="text"
+          inputMode="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="ابحث عن الولاية..."
+          className="h-11 border-0 bg-transparent pr-9 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+        />
+      </div>
+      <div
+        className="max-h-[260px] overflow-y-auto overscroll-contain"
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
-        <Command
-          dir="rtl"
-          filter={(itemValue, search) => {
-            if (!search) return 1;
-            const s = search.trim();
-            if (!s) return 1;
-            return itemValue.startsWith(s) ? 1 : itemValue.includes(s) ? 0.5 : 0;
-          }}
-        >
-          <CommandInput placeholder="ابحث عن الولاية..." className="h-11 text-base" />
-          <CommandList className="max-h-[280px] overflow-y-auto overscroll-contain">
-            <CommandEmpty>لا توجد ولاية مطابقة</CommandEmpty>
-            <CommandGroup>
-              {ALGERIAN_WILAYAS.map((w, i) => (
-                <CommandItem
-                  key={w}
-                  value={w}
-                  onSelect={() => {
-                    onChange(w);
-                    setOpen(false);
-                  }}
-                  className="text-base"
-                >
-                  <Check
+        {filtered.length === 0 ? (
+          <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+            لا توجد ولاية مطابقة
+          </div>
+        ) : (
+          <ul className="py-1">
+            {filtered.map(({ name, idx }) => {
+              const selected = value === name;
+              return (
+                <li key={name}>
+                  <button
+                    type="button"
+                    onClick={() => onChange(name)}
                     className={cn(
-                      "ms-2 h-4 w-4",
-                      value === w ? "opacity-100" : "opacity-0",
+                      "flex w-full items-center justify-between gap-2 px-4 py-2.5 text-right text-base transition-colors",
+                      selected
+                        ? "bg-primary/15 text-primary font-semibold"
+                        : "hover:bg-accent active:bg-accent",
                     )}
-                  />
-                  <span>
-                    {i + 1} - {w}
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+                  >
+                    <span className="flex-1 truncate">
+                      {idx + 1} - {name}
+                    </span>
+                    {selected && <Check className="h-4 w-4 shrink-0" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }
