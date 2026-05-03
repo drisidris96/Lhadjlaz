@@ -9,11 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ALGERIAN_WILAYAS } from "@/lib/constants";
+import { WilayaCombobox } from "@/components/wilaya-combobox";
 import { formatDZD } from "@/lib/utils";
 import { ArrowRight, ShoppingBag, CheckCircle2 } from "lucide-react";
 
@@ -202,20 +201,9 @@ export default function OrderPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-base">الولاية</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger className="h-12 bg-muted/50">
-                                  <SelectValue placeholder="اختر الولاية" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {ALGERIAN_WILAYAS.map((w, i) => (
-                                  <SelectItem key={w} value={w}>
-                                    {i + 1} - {w}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <FormControl>
+                              <WilayaCombobox value={field.value} onChange={field.onChange} />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
