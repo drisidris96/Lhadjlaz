@@ -64,7 +64,7 @@ export default function AdminLogin() {
             <ShieldCheck className="w-8 h-8" />
           </div>
           <h1 className="text-3xl font-black text-foreground">الحاج لاز</h1>
-          <p className="text-muted-foreground mt-2">نظام إدارة متجر الجملة</p>
+          <p className="text-muted-foreground mt-2">نظام إدارة المتجر</p>
         </div>
 
         <Card className="border-border/50 shadow-xl">

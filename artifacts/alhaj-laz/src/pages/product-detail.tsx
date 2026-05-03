@@ -85,7 +85,7 @@ export default function ProductDetail() {
               </h1>
               
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-8 mt-2 flex flex-col gap-2">
-                <p className="text-sm font-bold text-muted-foreground">سعر الجملة</p>
+                <p className="text-sm font-bold text-muted-foreground">السعر</p>
                 <p className="text-4xl font-black text-primary">{formatDZD(product.price)}</p>
                 <div className="text-sm font-medium mt-2 flex items-center gap-2">
                   <span className="bg-muted px-2 py-1 rounded">الحد الأدنى للطلب:</span>

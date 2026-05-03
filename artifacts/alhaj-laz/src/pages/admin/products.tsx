@@ -241,7 +241,7 @@ export default function AdminProducts() {
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>سعر الجملة (د.ج)</FormLabel>
+                          <FormLabel>السعر (د.ج)</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} />
                           </FormControl>
@@ -394,7 +394,7 @@ export default function AdminProducts() {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>سعر الجملة (د.ج)</FormLabel>
+                        <FormLabel>السعر (د.ج)</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>

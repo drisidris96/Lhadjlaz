@@ -26,7 +26,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               لوحة الإدارة
             </h2>
           </Link>
-          <p className="text-sidebar-foreground/70 text-sm mt-1">الحاج لاز - جملة</p>
+          <p className="text-sidebar-foreground/70 text-sm mt-1">الحاج لاز</p>
         </div>
         
         <nav className="px-4 py-2 space-y-2">

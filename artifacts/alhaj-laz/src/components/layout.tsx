@@ -93,7 +93,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <span className="font-bold text-xl">الحاج لاز</span>
             </div>
             <p className="text-secondary-foreground/70 mb-4 max-w-sm">
-              سوق الجملة للملابس الرائد في الجزائر. نقدم أفضل الأسعار والجودة العالية لتجار التجزئة.
+              سوق الملابس الرائد في الجزائر. نقدم أفضل الأسعار والجودة العالية.
             </p>
           </div>
           
@@ -116,7 +116,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <div className="container mx-auto px-4 mt-8 pt-8 border-t border-secondary-foreground/10 text-center text-secondary-foreground/50 text-sm">
-          &copy; {new Date().getFullYear()} الحاج لاز لبيع الملابس بالجملة. جميع الحقوق محفوظة.
+          &copy; {new Date().getFullYear()} الحاج لاز لبيع الملابس. جميع الحقوق محفوظة.
         </div>
       </footer>
     </div>

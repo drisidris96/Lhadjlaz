@@ -25,10 +25,10 @@ export default function Home() {
             المورد الأول لتجار الملابس في الجزائر
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-foreground leading-tight mb-6">
-            تسوق بالجملة بكل ثقة من <span className="text-primary">الحاج لاز</span>
+            تسوق بكل ثقة من <span className="text-primary">الحاج لاز</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            نوفر لك أفضل تشكيلات الملابس بجودة عالية وأسعار جملة منافسة. اطلب الآن ونصلك إلى أي ولاية في الجزائر.
+            نوفر لك أفضل تشكيلات الملابس بجودة عالية وأسعار منافسة. اطلب الآن ونصلك إلى أي ولاية في الجزائر.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/products">
@@ -70,7 +70,7 @@ export default function Home() {
                 <ShoppingBag className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold text-foreground">أسعار جملة</h3>
+                <h3 className="font-bold text-foreground">أفضل الأسعار</h3>
                 <p className="text-sm text-muted-foreground">هوامش ربح ممتازة للتجار</p>
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-10 border-b border-border/50 pb-6">
             <div>
               <h2 className="text-3xl font-bold text-foreground tracking-tight">وصل حديثاً</h2>
-              <p className="text-muted-foreground mt-2">أحدث تشكيلات الملابس المتوفرة للبيع بالجملة</p>
+              <p className="text-muted-foreground mt-2">أحدث تشكيلات الملابس المتوفرة</p>
             </div>
             <Link href="/products">
               <Button variant="outline" className="hidden sm:flex">

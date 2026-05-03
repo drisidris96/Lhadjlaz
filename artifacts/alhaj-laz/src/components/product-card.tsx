@@ -42,7 +42,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </p>
         <div className="flex items-end justify-between mt-auto">
           <div>
-            <p className="text-xs text-muted-foreground mb-1">سعر الجملة</p>
+            <p className="text-xs text-muted-foreground mb-1">السعر</p>
             <p className="font-bold text-xl text-primary">{formatDZD(product.price)}</p>
           </div>
           <div className="text-left">
