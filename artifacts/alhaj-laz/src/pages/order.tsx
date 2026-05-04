@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { WilayaCombobox } from "@/components/wilaya-combobox";
+import { BaladiyaCombobox } from "@/components/baladiya-combobox";
 import { formatDZD } from "@/lib/utils";
 import { ArrowRight, ShoppingBag, CheckCircle2 } from "lucide-react";
 
@@ -53,6 +54,7 @@ export default function OrderPage() {
     lastName: z.string().min(2, "اللقب يجب أن يكون حرفين على الأقل"),
     phone: z.string().min(10, "رقم الهاتف غير صحيح").regex(/^[0-9]+$/, "أرقام فقط"),
     wilaya: z.string().min(1, "يرجى اختيار الولاية"),
+    baladiya: z.string().min(1, "يرجى اختيار البلدية"),
     address: z.string().min(5, "العنوان يجب أن يكون مفصلاً"),
     quantity: z.number().min(product?.minOrderQty || 1, `الحد الأدنى هو ${product?.minOrderQty || 1} قطعة`),
     notes: z.string().optional()
@@ -67,6 +69,7 @@ export default function OrderPage() {
       lastName: "",
       phone: "",
       wilaya: "",
+      baladiya: "",
       address: "",
       quantity: product?.minOrderQty || 1,
       notes: ""
@@ -81,9 +84,11 @@ export default function OrderPage() {
   }, [product, form]);
 
   const onSubmit = (data: OrderFormValues) => {
+    const { baladiya, address, ...rest } = data;
     createOrder.mutate({
       data: {
-        ...data,
+        ...rest,
+        address: `${baladiya} - ${address}`,
         productId
       }
     });
@@ -202,7 +207,31 @@ export default function OrderPage() {
                           <FormItem>
                             <FormLabel className="text-base">الولاية</FormLabel>
                             <FormControl>
-                              <WilayaCombobox value={field.value} onChange={field.onChange} />
+                              <WilayaCombobox
+                                value={field.value}
+                                onChange={(v) => {
+                                  field.onChange(v);
+                                  form.setValue("baladiya", "");
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="baladiya"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-base">البلدية</FormLabel>
+                            <FormControl>
+                              <BaladiyaCombobox
+                                wilaya={form.watch("wilaya")}
+                                value={field.value}
+                                onChange={field.onChange}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
