@@ -65,6 +65,7 @@ export interface Order {
   totalPrice: number;
   status: OrderStatus;
   notes?: string;
+  trackingNumber?: string;
   createdAt: string;
 }
 
@@ -127,6 +128,20 @@ export interface UploadUrlResponse {
   uploadURL: string;
   objectPath: string;
   metadata?: UploadUrlRequest;
+}
+
+export type ImportTrackingBodyItemsItem = {
+  orderId: number;
+  trackingNumber: string;
+};
+
+export interface ImportTrackingBody {
+  items: ImportTrackingBodyItemsItem[];
+}
+
+export interface ImportTrackingResponse {
+  updated: number;
+  notFound: number[];
 }
 
 export interface StoreStats {

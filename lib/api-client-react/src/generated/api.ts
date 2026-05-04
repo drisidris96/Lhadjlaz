@@ -24,6 +24,8 @@ import type {
   CreateProductBody,
   ErrorEnvelope,
   HealthStatus,
+  ImportTrackingBody,
+  ImportTrackingResponse,
   ListProductsParams,
   Order,
   Product,
@@ -1382,6 +1384,165 @@ export function useGetStorageObject<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Export confirmed orders as DHD/Ecotrack CSV
+ */
+export const getExportDhdCsvUrl = () => {
+  return `/api/admin/dhd/export`;
+};
+
+export const exportDhdCsv = async (options?: RequestInit): Promise<string> => {
+  return customFetch<string>(getExportDhdCsvUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getExportDhdCsvQueryKey = () => {
+  return [`/api/admin/dhd/export`] as const;
+};
+
+export const getExportDhdCsvQueryOptions = <
+  TData = Awaited<ReturnType<typeof exportDhdCsv>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof exportDhdCsv>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getExportDhdCsvQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof exportDhdCsv>>> = ({
+    signal,
+  }) => exportDhdCsv({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof exportDhdCsv>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ExportDhdCsvQueryResult = NonNullable<
+  Awaited<ReturnType<typeof exportDhdCsv>>
+>;
+export type ExportDhdCsvQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Export confirmed orders as DHD/Ecotrack CSV
+ */
+
+export function useExportDhdCsv<
+  TData = Awaited<ReturnType<typeof exportDhdCsv>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof exportDhdCsv>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getExportDhdCsvQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Import tracking numbers from DHD/Ecotrack
+ */
+export const getImportDhdTrackingUrl = () => {
+  return `/api/admin/dhd/import-tracking`;
+};
+
+export const importDhdTracking = async (
+  importTrackingBody: ImportTrackingBody,
+  options?: RequestInit,
+): Promise<ImportTrackingResponse> => {
+  return customFetch<ImportTrackingResponse>(getImportDhdTrackingUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(importTrackingBody),
+  });
+};
+
+export const getImportDhdTrackingMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof importDhdTracking>>,
+    TError,
+    { data: BodyType<ImportTrackingBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof importDhdTracking>>,
+  TError,
+  { data: BodyType<ImportTrackingBody> },
+  TContext
+> => {
+  const mutationKey = ["importDhdTracking"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof importDhdTracking>>,
+    { data: BodyType<ImportTrackingBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return importDhdTracking(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ImportDhdTrackingMutationResult = NonNullable<
+  Awaited<ReturnType<typeof importDhdTracking>>
+>;
+export type ImportDhdTrackingMutationBody = BodyType<ImportTrackingBody>;
+export type ImportDhdTrackingMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Import tracking numbers from DHD/Ecotrack
+ */
+export const useImportDhdTracking = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof importDhdTracking>>,
+    TError,
+    { data: BodyType<ImportTrackingBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof importDhdTracking>>,
+  TError,
+  { data: BodyType<ImportTrackingBody> },
+  TContext
+> => {
+  return useMutation(getImportDhdTrackingMutationOptions(options));
+};
 
 /**
  * @summary Get store statistics

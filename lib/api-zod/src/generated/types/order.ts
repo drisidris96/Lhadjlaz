@@ -20,5 +20,6 @@ export interface Order {
   totalPrice: number;
   status: OrderStatus;
   notes?: string;
+  trackingNumber?: string;
   createdAt: string;
 }

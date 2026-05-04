@@ -1,8 +1,10 @@
+import { useRef, useState } from "react";
 import { useLocation } from "wouter";
 import {
   useListOrders,
   useUpdateOrderStatus,
   useAdminMe,
+  useImportDhdTracking,
   getListOrdersQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingBag, Check, X, Inbox, Archive } from "lucide-react";
+import { ShoppingBag, Check, X, Inbox, Archive, Download, Upload } from "lucide-react";
 import { formatDZD } from "@/lib/utils";
 import { ORDER_STATUS_ARABIC } from "@/lib/constants";
 import type { UpdateOrderStatusBodyStatus } from "@workspace/api-client-react/generated";
@@ -20,8 +22,91 @@ export default function AdminOrders() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
 
   const { data: session, isLoading: sessionLoading } = useAdminMe();
+
+  const importTracking = useImportDhdTracking({
+    mutation: {
+      onSuccess: (data) => {
+        const d = data as { updated: number; notFound: number[] };
+        toast({
+          title: `تم تحديث ${d.updated} طلبية`,
+          description:
+            d.notFound.length > 0
+              ? `طلبيات غير موجودة: ${d.notFound.join(", ")}`
+              : "كل الأرقام تم استيرادها بنجاح",
+        });
+        queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey() });
+      },
+      onError: () => {
+        toast({
+          variant: "destructive",
+          title: "فشل الاستيراد",
+          description: "تأكد من صيغة الملف وحاول مرة أخرى",
+        });
+      },
+      onSettled: () => setImporting(false),
+    },
+  });
+
+  const handleExportCsv = () => {
+    const url = `${import.meta.env.BASE_URL}api/admin/dhd/export`;
+    window.location.href = url;
+  };
+
+  const parseTrackingFile = async (file: File): Promise<{ orderId: number; trackingNumber: string }[]> => {
+    const text = await file.text();
+    const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((l) => l.trim());
+    if (lines.length === 0) return [];
+    const header = lines[0].toLowerCase();
+    const sep = header.includes(";") ? ";" : ",";
+    const cols = header.split(sep).map((c) => c.trim().replace(/^"|"$/g, ""));
+    const refIdx = cols.findIndex((c) => /reference|ref|cmd|commande|order/i.test(c));
+    const trackIdx = cols.findIndex((c) => /tracking|tracker|colis|tracking_number|num_colis/i.test(c));
+    if (refIdx === -1 || trackIdx === -1) {
+      throw new Error("Missing reference or tracking column");
+    }
+    const items: { orderId: number; trackingNumber: string }[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(sep).map((c) => c.trim().replace(/^"|"$/g, ""));
+      const ref = parts[refIdx] || "";
+      const tn = parts[trackIdx] || "";
+      const idMatch = ref.match(/(\d+)/);
+      if (!idMatch || !tn) continue;
+      items.push({ orderId: parseInt(idMatch[1], 10), trackingNumber: tn });
+    }
+    return items;
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const items = await parseTrackingFile(file);
+      if (items.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "الملف فارغ أو غير صالح",
+          description: "تأكد من وجود أعمدة reference و tracking",
+        });
+        setImporting(false);
+        return;
+      }
+      importTracking.mutate({ data: { items } });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "خطأ في قراءة الملف",
+        description: "تأكد من أن الملف بصيغة CSV صحيحة",
+      });
+      setImporting(false);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   if (!sessionLoading && !session?.isAdmin) {
     setLocation("/admin/login");
@@ -124,11 +209,42 @@ export default function AdminOrders() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">إدارة الطلبات</h1>
-          <p className="text-muted-foreground mt-1">
-            راجع الطلبات الجديدة وأكّدها أو ارفضها، وتابع الطلبات المؤكَّدة والملغاة
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">إدارة الطلبات</h1>
+            <p className="text-muted-foreground mt-1">
+              راجع الطلبات الجديدة وأكّدها أو ارفضها، وتابع الطلبات المؤكَّدة والملغاة
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              className="gap-2 border-primary text-primary hover:bg-primary/10"
+              onClick={handleExportCsv}
+              data-testid="button-export-dhd"
+            >
+              <Download className="w-4 h-4" />
+              تصدير لـ DHD
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2 border-primary text-primary hover:bg-primary/10"
+              disabled={importing}
+              onClick={() => fileInputRef.current?.click()}
+              data-testid="button-import-tracking"
+            >
+              <Upload className="w-4 h-4" />
+              {importing ? "جاري الاستيراد..." : "استيراد أرقام التتبع"}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleImportFile}
+              data-testid="input-tracking-file"
+            />
+          </div>
         </div>
 
         {/* ============== الطلبات الجديدة (قيد الانتظار) ============== */}
@@ -320,6 +436,9 @@ export default function AdminOrders() {
                       <th className="h-12 px-4 align-middle font-medium text-muted-foreground">
                         الكمية
                       </th>
+                      <th className="h-12 px-4 align-middle font-medium text-muted-foreground">
+                        رقم التتبع
+                      </th>
                       <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-40">
                         حالة الطلب
                       </th>
@@ -352,6 +471,18 @@ export default function AdminOrders() {
                         </td>
                         <td className="p-4 align-middle font-bold text-center">
                           {order.quantity}
+                        </td>
+                        <td className="p-4 align-middle">
+                          {order.trackingNumber ? (
+                            <span
+                              className="font-mono text-xs bg-primary/10 text-primary px-2 py-1 rounded inline-block"
+                              dir="ltr"
+                            >
+                              {order.trackingNumber}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/50 text-xs">—</span>
+                          )}
                         </td>
                         <td className="p-4 align-middle">
                           <div className="flex flex-wrap items-center gap-2">

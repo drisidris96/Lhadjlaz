@@ -126,6 +126,7 @@ export const ListOrdersResponseItem = zod.object({
     "cancelled",
   ]),
   notes: zod.string().optional(),
+  trackingNumber: zod.string().optional(),
   createdAt: zod.string(),
 });
 export const ListOrdersResponse = zod.array(ListOrdersResponseItem);
@@ -171,6 +172,7 @@ export const GetOrderResponse = zod.object({
     "cancelled",
   ]),
   notes: zod.string().optional(),
+  trackingNumber: zod.string().optional(),
   createdAt: zod.string(),
 });
 
@@ -212,6 +214,7 @@ export const UpdateOrderStatusResponse = zod.object({
     "cancelled",
   ]),
   notes: zod.string().optional(),
+  trackingNumber: zod.string().optional(),
   createdAt: zod.string(),
 });
 
@@ -276,6 +279,23 @@ export const GetStorageObjectParams = zod.object({
 });
 
 /**
+ * @summary Import tracking numbers from DHD/Ecotrack
+ */
+export const ImportDhdTrackingBody = zod.object({
+  items: zod.array(
+    zod.object({
+      orderId: zod.number(),
+      trackingNumber: zod.string(),
+    }),
+  ),
+});
+
+export const ImportDhdTrackingResponse = zod.object({
+  updated: zod.number(),
+  notFound: zod.array(zod.number()),
+});
+
+/**
  * @summary Get store statistics
  */
 export const GetAdminStatsResponse = zod.object({
@@ -304,6 +324,7 @@ export const GetAdminStatsResponse = zod.object({
         "cancelled",
       ]),
       notes: zod.string().optional(),
+      trackingNumber: zod.string().optional(),
       createdAt: zod.string(),
     }),
   ),

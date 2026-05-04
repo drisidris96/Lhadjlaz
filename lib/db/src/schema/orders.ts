@@ -15,6 +15,7 @@ export const ordersTable = pgTable("orders", {
   totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull().default("pending"),
   notes: text("notes"),
+  trackingNumber: text("tracking_number"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

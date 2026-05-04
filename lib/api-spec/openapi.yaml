@@ -334,6 +334,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
+  /admin/dhd/export:
+    get:
+      operationId: exportDhdCsv
+      tags: [admin]
+      summary: Export confirmed orders as DHD/Ecotrack CSV
+      responses:
+        "200":
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /admin/dhd/import-tracking:
+    post:
+      operationId: importDhdTracking
+      tags: [admin]
+      summary: Import tracking numbers from DHD/Ecotrack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportTrackingBody"
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportTrackingResponse"
+
   /admin/stats:
     get:
       operationId: getAdminStats
@@ -457,6 +489,8 @@ components:
           enum: [pending, confirmed, shipped, out_for_delivery, delivered, cancelled]
         notes:
           type: string
+        trackingNumber:
+          type: string
         createdAt:
           type: string
       required:
@@ -572,6 +606,32 @@ components:
           type: string
         metadata:
           $ref: '#/components/schemas/UploadUrlRequest'
+
+    ImportTrackingBody:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [orderId, trackingNumber]
+            properties:
+              orderId:
+                type: integer
+              trackingNumber:
+                type: string
+
+    ImportTrackingResponse:
+      type: object
+      required: [updated, notFound]
+      properties:
+        updated:
+          type: integer
+        notFound:
+          type: array
+          items:
+            type: integer
 
     StoreStats:
       type: object
