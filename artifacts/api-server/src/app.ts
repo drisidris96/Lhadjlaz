@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { verifySession } from "./lib/session";
 
 const app: Express = express();
 
@@ -32,16 +33,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  try {
-    const cookieVal = req.cookies?.admin_session;
-    if (cookieVal) {
-      (req as any).session = JSON.parse(cookieVal);
-    } else {
-      (req as any).session = null;
-    }
-  } catch {
-    (req as any).session = null;
-  }
+  const cookieVal = req.cookies?.admin_session;
+  (req as any).session = verifySession(cookieVal);
   next();
 });
 

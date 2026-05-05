@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, productsTable, ordersTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { AdminLoginBody } from "@workspace/api-zod";
+import { signSession, SESSION_COOKIE_MAX_AGE_MS } from "../lib/session";
 
 const router = Router();
 
@@ -18,12 +19,14 @@ router.post("/admin/login", async (req, res) => {
     parsed.data.username === ADMIN_USERNAME &&
     parsed.data.password === ADMIN_PASSWORD
   ) {
+    const token = signSession({ isAdmin: true, username: parsed.data.username });
     (req as any).session = { isAdmin: true, username: parsed.data.username };
     res
-      .cookie("admin_session", JSON.stringify({ isAdmin: true, username: parsed.data.username }), {
+      .cookie("admin_session", token, {
         httpOnly: true,
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24 * 7,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: SESSION_COOKIE_MAX_AGE_MS,
       })
       .json({ success: true, message: "Login successful" });
   } else {
