@@ -44,7 +44,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { formatDZD } from "@/lib/utils";
-import { ORDER_STATUS_ARABIC, ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT } from "@/lib/constants";
+import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT } from "@/lib/constants";
 import type { UpdateOrderStatusBodyStatus } from "@workspace/api-client-react/generated";
 
 export default function AdminOrders() {
@@ -288,36 +288,9 @@ export default function AdminOrders() {
     "out_for_delivery",
     "delivered",
     "cancelled",
+    "pending_delivery",
+    "cash_ready",
   ] as const;
-
-  const STATUS_BUTTON_STYLES: Record<
-    string,
-    { active: string; inactive: string }
-  > = {
-    confirmed: {
-      active: "bg-blue-600 text-white",
-      inactive: "bg-white border border-blue-600 text-blue-700 hover:bg-blue-50",
-    },
-    shipped: {
-      active: "bg-indigo-600 text-white",
-      inactive:
-        "bg-white border border-indigo-600 text-indigo-700 hover:bg-indigo-50",
-    },
-    out_for_delivery: {
-      active: "bg-purple-600 text-white",
-      inactive:
-        "bg-white border border-purple-600 text-purple-700 hover:bg-purple-50",
-    },
-    delivered: {
-      active: "bg-green-600 text-white",
-      inactive:
-        "bg-white border border-green-600 text-green-700 hover:bg-green-50",
-    },
-    cancelled: {
-      active: "bg-red-600 text-white",
-      inactive: "bg-white border border-red-600 text-red-700 hover:bg-red-50",
-    },
-  };
 
   const pendingOrders = (orders ?? []).filter((o) => o.status === "pending");
   const processedOrders = (orders ?? []).filter((o) =>
@@ -734,7 +707,7 @@ export default function AdminOrders() {
                         رقم التتبع
                       </th>
                       <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-40">
-                        حالة الطلب
+                        الإجراءات
                       </th>
                     </tr>
                   </thead>
@@ -783,7 +756,7 @@ export default function AdminOrders() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-amber-500 text-amber-700 hover:bg-amber-50 font-bold shadow-sm whitespace-nowrap w-full"
+                              className="border-amber-500 text-amber-700 hover:bg-amber-50 font-bold shadow-sm whitespace-nowrap"
                               disabled={updateStatus.isPending}
                               onClick={() => openEditDialog(order)}
                               data-testid={`button-edit-processed-${order.id}`}
@@ -791,30 +764,42 @@ export default function AdminOrders() {
                               <Pencil className="w-4 h-4 ml-1" />
                               تعديل
                             </Button>
-                            {PROCESSED_STATUSES.map((status) => {
-                              const isActive = order.status === status;
-                              const styles = STATUS_BUTTON_STYLES[status];
-                              return (
-                                <Button
-                                  key={status}
-                                  size="sm"
-                                  disabled={
-                                    updateStatus.isPending || isActive
-                                  }
-                                  onClick={() =>
-                                    handleStatusChange(order.id, status)
-                                  }
-                                  className={`font-medium shadow-sm whitespace-nowrap ${
-                                    isActive
-                                      ? `${styles.active} font-bold shadow cursor-default opacity-100 disabled:opacity-100`
-                                      : styles.inactive
-                                  }`}
-                                  data-testid={`button-set-${status}-${order.id}`}
-                                >
-                                  {ORDER_STATUS_ARABIC[status]}
-                                </Button>
-                              );
-                            })}
+                            <Button
+                              size="sm"
+                              disabled={
+                                updateStatus.isPending ||
+                                order.status === "confirmed"
+                              }
+                              onClick={() =>
+                                handleStatusChange(order.id, "confirmed")
+                              }
+                              className={`font-medium shadow-sm whitespace-nowrap ${
+                                order.status === "confirmed"
+                                  ? "bg-blue-600 text-white font-bold cursor-default opacity-100 disabled:opacity-100"
+                                  : "bg-white border border-blue-600 text-blue-700 hover:bg-blue-50"
+                              }`}
+                              data-testid={`button-set-confirmed-${order.id}`}
+                            >
+                              تأكيد
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={
+                                updateStatus.isPending ||
+                                order.status === "cancelled"
+                              }
+                              onClick={() =>
+                                handleStatusChange(order.id, "cancelled")
+                              }
+                              className={`font-medium shadow-sm whitespace-nowrap ${
+                                order.status === "cancelled"
+                                  ? "bg-red-600 text-white font-bold cursor-default opacity-100 disabled:opacity-100"
+                                  : "bg-white border border-red-600 text-red-700 hover:bg-red-50"
+                              }`}
+                              data-testid={`button-set-cancelled-${order.id}`}
+                            >
+                              إلغاء
+                            </Button>
                           </div>
                         </td>
                       </tr>

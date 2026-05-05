@@ -27,7 +27,13 @@ import {
 import { formatDZD } from "@/lib/utils";
 
 const READY_TO_SHIP_STATUSES = ["confirmed"] as const;
-const SHIPPED_STATUSES = ["shipped", "out_for_delivery", "delivered"] as const;
+const SHIPPED_STATUSES = [
+  "shipped",
+  "out_for_delivery",
+  "pending_delivery",
+  "delivered",
+  "cash_ready",
+] as const;
 
 export default function AdminDhd() {
   const [, setLocation] = useLocation();
@@ -536,21 +542,44 @@ export default function AdminDhd() {
                           )}
                         </td>
                         <td className="p-4">
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${
-                              order.status === "delivered"
-                                ? "bg-green-100 text-green-800"
-                                : order.status === "out_for_delivery"
-                                  ? "bg-purple-100 text-purple-800"
-                                  : "bg-indigo-100 text-indigo-800"
-                            }`}
-                          >
-                            {order.status === "delivered"
-                              ? "تم التسليم"
-                              : order.status === "out_for_delivery"
-                                ? "قيد التوصيل"
-                                : "في انتظار الشحن"}
-                          </span>
+                          {(() => {
+                            const map: Record<
+                              string,
+                              { cls: string; label: string }
+                            > = {
+                              shipped: {
+                                cls: "bg-indigo-100 text-indigo-800",
+                                label: "في انتظار الشحن",
+                              },
+                              out_for_delivery: {
+                                cls: "bg-purple-100 text-purple-800",
+                                label: "قيد التوصيل",
+                              },
+                              pending_delivery: {
+                                cls: "bg-orange-100 text-orange-800",
+                                label: "معلّق",
+                              },
+                              delivered: {
+                                cls: "bg-green-100 text-green-800",
+                                label: "تم التسليم",
+                              },
+                              cash_ready: {
+                                cls: "bg-emerald-100 text-emerald-800",
+                                label: "مسترجعة غير مدفوعة",
+                              },
+                            };
+                            const s = map[order.status] ?? {
+                              cls: "bg-gray-100 text-gray-800",
+                              label: order.status,
+                            };
+                            return (
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full font-medium ${s.cls}`}
+                              >
+                                {s.label}
+                              </span>
+                            );
+                          })()}
                         </td>
                       </tr>
                     ))}
