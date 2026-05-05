@@ -32,6 +32,10 @@ export default function AdminOrdersList() {
         return "bg-green-100 text-green-800";
       case "cancelled":
         return "bg-red-100 text-red-800";
+      case "pending_delivery":
+        return "bg-orange-100 text-orange-800";
+      case "cash_ready":
+        return "bg-emerald-100 text-emerald-800";
       default:
         return "bg-gray-100 text-gray-800";
     }

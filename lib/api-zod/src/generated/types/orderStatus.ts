@@ -15,4 +15,6 @@ export const OrderStatus = {
   out_for_delivery: "out_for_delivery",
   delivered: "delivered",
   cancelled: "cancelled",
+  pending_delivery: "pending_delivery",
+  cash_ready: "cash_ready",
 } as const;

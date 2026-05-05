@@ -14,6 +14,7 @@ import AdminProducts from "@/pages/admin/products";
 import AdminOrders from "@/pages/admin/orders";
 import AdminOrdersList from "@/pages/admin/orders-list";
 import AdminDhd from "@/pages/admin/dhd";
+import AdminDhdSync from "@/pages/admin/dhd-sync";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/admin/orders" component={AdminOrders} />
       <Route path="/admin/orders-list" component={AdminOrdersList} />
       <Route path="/admin/dhd" component={AdminDhd} />
+      <Route path="/admin/dhd-sync" component={AdminDhdSync} />
       <Route component={NotFound} />
     </Switch>
   );

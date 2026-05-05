@@ -100,8 +100,9 @@ router.put(
       res.status(404).json({ error: "Not found" });
       return;
     }
-    const { filename } = req.params;
-    if (!isValidUploadFilename(filename)) {
+    const filenameParam = req.params.filename;
+    const filename = Array.isArray(filenameParam) ? filenameParam[0] : filenameParam;
+    if (!filename || !isValidUploadFilename(filename)) {
       res.status(400).json({ error: "Invalid filename" });
       return;
     }

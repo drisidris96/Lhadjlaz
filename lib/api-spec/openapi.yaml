@@ -402,6 +402,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/UploadToDhdResponse"
 
+  /admin/dhd/sync-statuses:
+    post:
+      operationId: syncDhdStatuses
+      tags: [admin]
+      summary: Sync DHD platform statuses by tracking number lists per status bucket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncDhdStatusesBody"
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncDhdStatusesResponse"
+
   /admin/stats:
     get:
       operationId: getAdminStats
@@ -522,7 +541,7 @@ components:
           type: number
         status:
           type: string
-          enum: [pending, confirmed, shipped, out_for_delivery, delivered, cancelled]
+          enum: [pending, confirmed, shipped, out_for_delivery, delivered, cancelled, pending_delivery, cash_ready]
         notes:
           type: string
         trackingNumber:
@@ -574,9 +593,46 @@ components:
       properties:
         status:
           type: string
-          enum: [pending, confirmed, shipped, out_for_delivery, delivered, cancelled]
+          enum: [pending, confirmed, shipped, out_for_delivery, delivered, cancelled, pending_delivery, cash_ready]
       required:
         - status
+
+    SyncDhdStatusesBody:
+      type: object
+      required: [statuses]
+      properties:
+        statuses:
+          type: object
+          properties:
+            shipped:
+              type: array
+              items: { type: string }
+            out_for_delivery:
+              type: array
+              items: { type: string }
+            delivered:
+              type: array
+              items: { type: string }
+            pending_delivery:
+              type: array
+              items: { type: string }
+            cash_ready:
+              type: array
+              items: { type: string }
+
+    SyncDhdStatusesResponse:
+      type: object
+      required: [updated, unmatched, byStatus]
+      properties:
+        updated:
+          type: integer
+        unmatched:
+          type: array
+          items: { type: string }
+        byStatus:
+          type: object
+          additionalProperties:
+            type: integer
 
     UpdateOrderInfoBody:
       type: object

@@ -30,6 +30,8 @@ import type {
   Order,
   Product,
   StoreStats,
+  SyncDhdStatusesBody,
+  SyncDhdStatusesResponse,
   UpdateOrderInfoBody,
   UpdateOrderStatusBody,
   UpdateProductBody,
@@ -1712,6 +1714,92 @@ export const useUploadOrdersToDhd = <
   TContext
 > => {
   return useMutation(getUploadOrdersToDhdMutationOptions(options));
+};
+
+/**
+ * @summary Sync DHD platform statuses by tracking number lists per status bucket
+ */
+export const getSyncDhdStatusesUrl = () => {
+  return `/api/admin/dhd/sync-statuses`;
+};
+
+export const syncDhdStatuses = async (
+  syncDhdStatusesBody: SyncDhdStatusesBody,
+  options?: RequestInit,
+): Promise<SyncDhdStatusesResponse> => {
+  return customFetch<SyncDhdStatusesResponse>(getSyncDhdStatusesUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(syncDhdStatusesBody),
+  });
+};
+
+export const getSyncDhdStatusesMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof syncDhdStatuses>>,
+    TError,
+    { data: BodyType<SyncDhdStatusesBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof syncDhdStatuses>>,
+  TError,
+  { data: BodyType<SyncDhdStatusesBody> },
+  TContext
+> => {
+  const mutationKey = ["syncDhdStatuses"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof syncDhdStatuses>>,
+    { data: BodyType<SyncDhdStatusesBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return syncDhdStatuses(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SyncDhdStatusesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof syncDhdStatuses>>
+>;
+export type SyncDhdStatusesMutationBody = BodyType<SyncDhdStatusesBody>;
+export type SyncDhdStatusesMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Sync DHD platform statuses by tracking number lists per status bucket
+ */
+export const useSyncDhdStatuses = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof syncDhdStatuses>>,
+    TError,
+    { data: BodyType<SyncDhdStatusesBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof syncDhdStatuses>>,
+  TError,
+  { data: BodyType<SyncDhdStatusesBody> },
+  TContext
+> => {
+  return useMutation(getSyncDhdStatusesMutationOptions(options));
 };
 
 /**

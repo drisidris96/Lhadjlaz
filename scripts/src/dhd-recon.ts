@@ -39,7 +39,7 @@ async function req(
   jar: CookieJar,
   init: RequestInit & { followRedirect?: boolean } = {},
 ): Promise<Response> {
-  const headers = new Headers(init.headers as HeadersInit | undefined);
+  const headers = new Headers(init.headers as Record<string, string> | undefined);
   if (jar.size) headers.set("Cookie", cookieHeader(jar));
   if (!headers.has("User-Agent")) {
     headers.set(

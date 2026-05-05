@@ -124,6 +124,8 @@ export const ListOrdersResponseItem = zod.object({
     "out_for_delivery",
     "delivered",
     "cancelled",
+    "pending_delivery",
+    "cash_ready",
   ]),
   notes: zod.string().optional(),
   trackingNumber: zod.string().optional(),
@@ -170,6 +172,8 @@ export const GetOrderResponse = zod.object({
     "out_for_delivery",
     "delivered",
     "cancelled",
+    "pending_delivery",
+    "cash_ready",
   ]),
   notes: zod.string().optional(),
   trackingNumber: zod.string().optional(),
@@ -191,6 +195,8 @@ export const UpdateOrderStatusBody = zod.object({
     "out_for_delivery",
     "delivered",
     "cancelled",
+    "pending_delivery",
+    "cash_ready",
   ]),
 });
 
@@ -212,6 +218,8 @@ export const UpdateOrderStatusResponse = zod.object({
     "out_for_delivery",
     "delivered",
     "cancelled",
+    "pending_delivery",
+    "cash_ready",
   ]),
   notes: zod.string().optional(),
   trackingNumber: zod.string().optional(),
@@ -253,6 +261,8 @@ export const UpdateOrderInfoResponse = zod.object({
     "out_for_delivery",
     "delivered",
     "cancelled",
+    "pending_delivery",
+    "cash_ready",
   ]),
   notes: zod.string().optional(),
   trackingNumber: zod.string().optional(),
@@ -359,6 +369,25 @@ export const UploadOrdersToDhdResponse = zod.object({
 });
 
 /**
+ * @summary Sync DHD platform statuses by tracking number lists per status bucket
+ */
+export const SyncDhdStatusesBody = zod.object({
+  statuses: zod.object({
+    shipped: zod.array(zod.string()).optional(),
+    out_for_delivery: zod.array(zod.string()).optional(),
+    delivered: zod.array(zod.string()).optional(),
+    pending_delivery: zod.array(zod.string()).optional(),
+    cash_ready: zod.array(zod.string()).optional(),
+  }),
+});
+
+export const SyncDhdStatusesResponse = zod.object({
+  updated: zod.number(),
+  unmatched: zod.array(zod.string()),
+  byStatus: zod.record(zod.string(), zod.number()),
+});
+
+/**
  * @summary Get store statistics
  */
 export const GetAdminStatsResponse = zod.object({
@@ -385,6 +414,8 @@ export const GetAdminStatsResponse = zod.object({
         "out_for_delivery",
         "delivered",
         "cancelled",
+        "pending_delivery",
+        "cash_ready",
       ]),
       notes: zod.string().optional(),
       trackingNumber: zod.string().optional(),

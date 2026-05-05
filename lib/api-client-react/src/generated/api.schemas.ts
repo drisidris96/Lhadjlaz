@@ -50,6 +50,8 @@ export const OrderStatus = {
   out_for_delivery: "out_for_delivery",
   delivered: "delivered",
   cancelled: "cancelled",
+  pending_delivery: "pending_delivery",
+  cash_ready: "cash_ready",
 } as const;
 
 export interface Order {
@@ -90,10 +92,32 @@ export const UpdateOrderStatusBodyStatus = {
   out_for_delivery: "out_for_delivery",
   delivered: "delivered",
   cancelled: "cancelled",
+  pending_delivery: "pending_delivery",
+  cash_ready: "cash_ready",
 } as const;
 
 export interface UpdateOrderStatusBody {
   status: UpdateOrderStatusBodyStatus;
+}
+
+export type SyncDhdStatusesBodyStatuses = {
+  shipped?: string[];
+  out_for_delivery?: string[];
+  delivered?: string[];
+  pending_delivery?: string[];
+  cash_ready?: string[];
+};
+
+export interface SyncDhdStatusesBody {
+  statuses: SyncDhdStatusesBodyStatuses;
+}
+
+export type SyncDhdStatusesResponseByStatus = { [key: string]: number };
+
+export interface SyncDhdStatusesResponse {
+  updated: number;
+  unmatched: string[];
+  byStatus: SyncDhdStatusesResponseByStatus;
 }
 
 export interface UpdateOrderInfoBody {

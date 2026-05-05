@@ -1727,4 +1727,6 @@ export const ORDER_STATUS_ARABIC: Record<string, string> = {
   out_for_delivery: 'قيد التسليم',
   delivered: 'تم التسليم',
   cancelled: 'ملغى',
+  pending_delivery: 'معلّق',
+  cash_ready: 'مسترجعة غير مدفوعة',
 };

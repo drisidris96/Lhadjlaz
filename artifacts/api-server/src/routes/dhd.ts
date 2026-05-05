@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db, ordersTable } from "@workspace/db";
 import { eq, inArray, and, isNull } from "drizzle-orm";
-import { ImportDhdTrackingBody } from "@workspace/api-zod";
+import { ImportDhdTrackingBody, SyncDhdStatusesBody } from "@workspace/api-zod";
 import { getWilayaCode } from "../lib/wilaya-codes.js";
 
 const router = Router();
@@ -273,6 +273,96 @@ router.post("/admin/dhd/upload-to-dhd", async (req, res) => {
     failed,
     items: uploaded,
   });
+});
+
+// ====== Sync statuses from DHD platform (via browser bookmarklet) ======
+
+router.post("/admin/dhd/sync-statuses", async (req, res) => {
+  const session = (req as { session?: { isAdmin?: boolean } }).session;
+  if (!session?.isAdmin) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const parsed = SyncDhdStatusesBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error });
+    return;
+  }
+
+  const buckets = parsed.data.statuses;
+  const MAX_PER_BUCKET = 20000;
+  const TRACKING_RE = /^DHD[A-Z0-9]{8,40}$/;
+  const norm = (arr: string[] | undefined) =>
+    [
+      ...new Set(
+        (arr ?? [])
+          .slice(0, MAX_PER_BUCKET)
+          .map((s) => String(s).trim())
+          .filter((s) => TRACKING_RE.test(s)),
+      ),
+    ];
+
+  // Apply in priority order — last write wins. cash_ready overrides delivered.
+  const order: { status: string; tracks: string[] }[] = [
+    { status: "shipped", tracks: norm(buckets.shipped) },
+    { status: "out_for_delivery", tracks: norm(buckets.out_for_delivery) },
+    { status: "pending_delivery", tracks: norm(buckets.pending_delivery) },
+    { status: "delivered", tracks: norm(buckets.delivered) },
+    { status: "cash_ready", tracks: norm(buckets.cash_ready) },
+  ];
+
+  // Track final status assignment per tracking number
+  const finalAssignment = new Map<string, string>();
+  for (const { status, tracks } of order) {
+    for (const t of tracks) finalAssignment.set(t, status);
+  }
+
+  if (finalAssignment.size === 0) {
+    res.json({ updated: 0, unmatched: [], byStatus: {} });
+    return;
+  }
+
+  const allTracks = [...finalAssignment.keys()];
+  const existing = await db
+    .select({ id: ordersTable.id, trackingNumber: ordersTable.trackingNumber })
+    .from(ordersTable)
+    .where(inArray(ordersTable.trackingNumber, allTracks));
+
+  const found = new Set(
+    existing
+      .map((o) => o.trackingNumber)
+      .filter((t): t is string => typeof t === "string"),
+  );
+  const unmatched = allTracks.filter((t) => !found.has(t));
+
+  // Group by target status to do bulk updates per status
+  const groups = new Map<string, string[]>();
+  for (const [track, status] of finalAssignment.entries()) {
+    if (!found.has(track)) continue;
+    if (!groups.has(status)) groups.set(status, []);
+    groups.get(status)!.push(track);
+  }
+
+  const byStatus: Record<string, number> = {};
+  let updated = 0;
+  for (const [status, tracks] of groups.entries()) {
+    if (tracks.length === 0) continue;
+    const result = await db
+      .update(ordersTable)
+      .set({ status })
+      .where(inArray(ordersTable.trackingNumber, tracks))
+      .returning({ id: ordersTable.id });
+    byStatus[status] = result.length;
+    updated += result.length;
+  }
+
+  req.log?.info(
+    { updated, unmatched: unmatched.length, byStatus },
+    "DHD sync-statuses applied",
+  );
+
+  res.json({ updated, unmatched, byStatus });
 });
 
 export default router;
