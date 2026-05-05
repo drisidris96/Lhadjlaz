@@ -4,6 +4,7 @@ import {
   useListOrders,
   useAdminMe,
   useImportDhdTracking,
+  useUploadOrdersToDhd,
   getListOrdersQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,6 +21,8 @@ import {
   CheckCircle2,
   AlertCircle,
   FileSpreadsheet,
+  Zap,
+  Loader2,
 } from "lucide-react";
 import { formatDZD } from "@/lib/utils";
 
@@ -36,6 +39,11 @@ export default function AdminDhd() {
     updated: number;
     notFound: number[];
   } | null>(null);
+  const [lastUpload, setLastUpload] = useState<{
+    total: number;
+    uploaded: number;
+    failed: { orderId: number; error: string }[];
+  } | null>(null);
 
   const { data: session, isLoading: sessionLoading } = useAdminMe();
 
@@ -45,6 +53,41 @@ export default function AdminDhd() {
   }
 
   const { data: orders, isLoading: ordersLoading } = useListOrders();
+
+  const uploadToDhd = useUploadOrdersToDhd({
+    mutation: {
+      onSuccess: (data) => {
+        const d = data as {
+          total: number;
+          uploaded: number;
+          failed: { orderId: number; error: string }[];
+        };
+        setLastUpload(d);
+        toast({
+          title: `تم رفع ${d.uploaded} من ${d.total} طلبية إلى DHD`,
+          description:
+            d.failed.length > 0
+              ? `فشل ${d.failed.length} طلبية — راجع التفاصيل أدناه`
+              : "كل الطلبيات تم رفعها بنجاح وتغيير حالتها لـ مشحون",
+        });
+        queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey() });
+      },
+      onError: (err) => {
+        toast({
+          variant: "destructive",
+          title: "فشل الاتصال بـ DHD",
+          description:
+            err instanceof Error ? err.message : "تأكد من صحة الـ API token",
+        });
+      },
+    },
+  });
+
+  const handleUploadToDhd = () => {
+    if (!confirm("هل أنت متأكد من رفع كل الطلبيات الجاهزة إلى DHD؟")) return;
+    setLastUpload(null);
+    uploadToDhd.mutate();
+  };
 
   const importTracking = useImportDhdTracking({
     mutation: {
@@ -211,7 +254,90 @@ export default function AdminDhd() {
           </Card>
         </div>
 
-        {/* خطوات سير العمل */}
+        {/* الرفع التلقائي عبر API */}
+        <Card className="border-2 border-primary bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader className="pb-4 border-b">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <span className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center">
+                <Zap className="w-5 h-5" />
+              </span>
+              رفع تلقائي إلى DHD (الطريقة الأسرع)
+              <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full mr-auto">
+                موصول بـ API
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>
+                ارفع كل الطلبيات المؤكَّدة دفعة واحدة إلى منصة DHD مباشرةً عبر
+                الـ API. سيتم استلام أرقام التتبع وحفظها تلقائياً.
+              </p>
+              <p className="text-xs">
+                ⚡ بدون تنزيل CSV ولا رفع يدوي — كل شيء في 5 ثواني.
+              </p>
+            </div>
+
+            {lastUpload && (
+              <div
+                className={`rounded-md p-3 border ${
+                  lastUpload.failed.length > 0
+                    ? "bg-amber-50 border-amber-200"
+                    : "bg-green-50 border-green-200"
+                }`}
+              >
+                <div className="flex gap-2 mb-2">
+                  {lastUpload.failed.length > 0 ? (
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  )}
+                  <p className="text-sm font-medium">
+                    تم رفع {lastUpload.uploaded} من {lastUpload.total} طلبية
+                  </p>
+                </div>
+                {lastUpload.failed.length > 0 && (
+                  <div className="text-xs space-y-1 pr-7 max-h-40 overflow-auto">
+                    {lastUpload.failed.map((f) => (
+                      <div key={f.orderId} className="text-amber-900">
+                        • CMD-{f.orderId}: {f.error}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <Button
+              className="w-full gap-2 h-14 text-base font-bold"
+              onClick={handleUploadToDhd}
+              disabled={uploadToDhd.isPending || readyToShip.length === 0}
+              data-testid="button-upload-to-dhd"
+            >
+              {uploadToDhd.isPending ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  جاري الرفع إلى DHD...
+                </>
+              ) : (
+                <>
+                  <Zap className="w-5 h-5" />
+                  رفع {readyToShip.length} طلبية تلقائياً إلى DHD
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center gap-4 my-2">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground">
+            أو استخدم الطريقة اليدوية (CSV)
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {/* خطوات سير العمل اليدوية */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* الخطوة 1: التصدير */}
           <Card className="border-2 border-primary/30">

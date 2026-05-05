@@ -296,6 +296,28 @@ export const ImportDhdTrackingResponse = zod.object({
 });
 
 /**
+ * @summary Upload all confirmed orders directly to DHD/Ecotrack via API
+ */
+export const UploadOrdersToDhdResponse = zod.object({
+  total: zod.number(),
+  uploaded: zod.number(),
+  failed: zod.array(
+    zod.object({
+      orderId: zod.number(),
+      error: zod.string(),
+    }),
+  ),
+  items: zod
+    .array(
+      zod.object({
+        orderId: zod.number(),
+        trackingNumber: zod.string(),
+      }),
+    )
+    .optional(),
+});
+
+/**
  * @summary Get store statistics
  */
 export const GetAdminStatsResponse = zod.object({

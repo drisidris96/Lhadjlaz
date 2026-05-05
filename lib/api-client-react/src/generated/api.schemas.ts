@@ -144,6 +144,23 @@ export interface ImportTrackingResponse {
   notFound: number[];
 }
 
+export type UploadToDhdResponseFailedItem = {
+  orderId: number;
+  error: string;
+};
+
+export type UploadToDhdResponseItemsItem = {
+  orderId: number;
+  trackingNumber: string;
+};
+
+export interface UploadToDhdResponse {
+  total: number;
+  uploaded: number;
+  failed: UploadToDhdResponseFailedItem[];
+  items?: UploadToDhdResponseItemsItem[];
+}
+
 export interface StoreStats {
   totalProducts: number;
   totalOrders: number;

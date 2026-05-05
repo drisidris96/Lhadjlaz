@@ -24,5 +24,8 @@ export * from "./storeStats";
 export * from "./updateOrderStatusBody";
 export * from "./updateOrderStatusBodyStatus";
 export * from "./updateProductBody";
+export * from "./uploadToDhdResponse";
+export * from "./uploadToDhdResponseFailedItem";
+export * from "./uploadToDhdResponseItemsItem";
 export * from "./uploadUrlRequest";
 export * from "./uploadUrlResponse";

@@ -32,6 +32,7 @@ import type {
   StoreStats,
   UpdateOrderStatusBody,
   UpdateProductBody,
+  UploadToDhdResponse,
   UploadUrlRequest,
   UploadUrlResponse,
 } from "./api.schemas";
@@ -1542,6 +1543,87 @@ export const useImportDhdTracking = <
   TContext
 > => {
   return useMutation(getImportDhdTrackingMutationOptions(options));
+};
+
+/**
+ * @summary Upload all confirmed orders directly to DHD/Ecotrack via API
+ */
+export const getUploadOrdersToDhdUrl = () => {
+  return `/api/admin/dhd/upload-to-dhd`;
+};
+
+export const uploadOrdersToDhd = async (
+  options?: RequestInit,
+): Promise<UploadToDhdResponse> => {
+  return customFetch<UploadToDhdResponse>(getUploadOrdersToDhdUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getUploadOrdersToDhdMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadOrdersToDhd>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof uploadOrdersToDhd>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["uploadOrdersToDhd"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof uploadOrdersToDhd>>,
+    void
+  > = () => {
+    return uploadOrdersToDhd(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UploadOrdersToDhdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof uploadOrdersToDhd>>
+>;
+
+export type UploadOrdersToDhdMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Upload all confirmed orders directly to DHD/Ecotrack via API
+ */
+export const useUploadOrdersToDhd = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadOrdersToDhd>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof uploadOrdersToDhd>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getUploadOrdersToDhdMutationOptions(options));
 };
 
 /**

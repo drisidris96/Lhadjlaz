@@ -366,6 +366,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/ImportTrackingResponse"
 
+  /admin/dhd/upload-to-dhd:
+    post:
+      operationId: uploadOrdersToDhd
+      tags: [admin]
+      summary: Upload all confirmed orders directly to DHD/Ecotrack via API
+      responses:
+        "200":
+          description: Upload result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadToDhdResponse"
+
   /admin/stats:
     get:
       operationId: getAdminStats
@@ -632,6 +645,35 @@ components:
           type: array
           items:
             type: integer
+
+    UploadToDhdResponse:
+      type: object
+      required: [uploaded, failed, total]
+      properties:
+        total:
+          type: integer
+        uploaded:
+          type: integer
+        failed:
+          type: array
+          items:
+            type: object
+            required: [orderId, error]
+            properties:
+              orderId:
+                type: integer
+              error:
+                type: string
+        items:
+          type: array
+          items:
+            type: object
+            required: [orderId, trackingNumber]
+            properties:
+              orderId:
+                type: integer
+              trackingNumber:
+                type: string
 
     StoreStats:
       type: object
