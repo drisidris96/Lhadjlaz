@@ -4,8 +4,10 @@ import { eq } from "drizzle-orm";
 import {
   CreateOrderBody,
   UpdateOrderStatusBody,
+  UpdateOrderInfoBody,
   GetOrderParams,
   UpdateOrderStatusParams,
+  UpdateOrderInfoParams,
 } from "@workspace/api-zod";
 
 const router = Router();
@@ -112,6 +114,59 @@ router.put("/orders/:id", async (req, res) => {
     res.status(404).json({ error: "Order not found" });
     return;
   }
+  res.json({ ...order, totalPrice: Number(order.totalPrice) });
+});
+
+router.patch("/orders/:id", async (req, res) => {
+  const session = (req as any).session;
+  if (!session?.isAdmin) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const paramParsed = UpdateOrderInfoParams.safeParse({ id: Number(req.params.id) });
+  if (!paramParsed.success) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+  const parsed = UpdateOrderInfoBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error });
+    return;
+  }
+
+  const [existing] = await db
+    .select()
+    .from(ordersTable)
+    .where(eq(ordersTable.id, paramParsed.data.id));
+  if (!existing) {
+    res.status(404).json({ error: "Order not found" });
+    return;
+  }
+
+  const updates: Record<string, unknown> = {};
+  const d = parsed.data;
+  if (d.firstName !== undefined) updates.firstName = d.firstName;
+  if (d.lastName !== undefined) updates.lastName = d.lastName;
+  if (d.phone !== undefined) updates.phone = d.phone;
+  if (d.wilaya !== undefined) updates.wilaya = d.wilaya;
+  if (d.address !== undefined) updates.address = d.address;
+  if (d.notes !== undefined) updates.notes = d.notes;
+  if (d.quantity !== undefined) {
+    updates.quantity = d.quantity;
+    const newTotal = Number(existing.totalPrice) / existing.quantity * d.quantity;
+    updates.totalPrice = String(newTotal);
+  }
+
+  if (Object.keys(updates).length === 0) {
+    res.json({ ...existing, totalPrice: Number(existing.totalPrice) });
+    return;
+  }
+
+  const [order] = await db
+    .update(ordersTable)
+    .set(updates)
+    .where(eq(ordersTable.id, paramParsed.data.id))
+    .returning();
   res.json({ ...order, totalPrice: Number(order.totalPrice) });
 });
 

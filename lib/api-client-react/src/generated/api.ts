@@ -30,6 +30,7 @@ import type {
   Order,
   Product,
   StoreStats,
+  UpdateOrderInfoBody,
   UpdateOrderStatusBody,
   UpdateProductBody,
   UploadToDhdResponse,
@@ -888,6 +889,93 @@ export const useUpdateOrderStatus = <
   TContext
 > => {
   return useMutation(getUpdateOrderStatusMutationOptions(options));
+};
+
+/**
+ * @summary Update customer info on an order (admin only)
+ */
+export const getUpdateOrderInfoUrl = (id: number) => {
+  return `/api/orders/${id}`;
+};
+
+export const updateOrderInfo = async (
+  id: number,
+  updateOrderInfoBody: UpdateOrderInfoBody,
+  options?: RequestInit,
+): Promise<Order> => {
+  return customFetch<Order>(getUpdateOrderInfoUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateOrderInfoBody),
+  });
+};
+
+export const getUpdateOrderInfoMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateOrderInfo>>,
+    TError,
+    { id: number; data: BodyType<UpdateOrderInfoBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateOrderInfo>>,
+  TError,
+  { id: number; data: BodyType<UpdateOrderInfoBody> },
+  TContext
+> => {
+  const mutationKey = ["updateOrderInfo"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateOrderInfo>>,
+    { id: number; data: BodyType<UpdateOrderInfoBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateOrderInfo(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateOrderInfoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateOrderInfo>>
+>;
+export type UpdateOrderInfoMutationBody = BodyType<UpdateOrderInfoBody>;
+export type UpdateOrderInfoMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update customer info on an order (admin only)
+ */
+export const useUpdateOrderInfo = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateOrderInfo>>,
+    TError,
+    { id: number; data: BodyType<UpdateOrderInfoBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateOrderInfo>>,
+  TError,
+  { id: number; data: BodyType<UpdateOrderInfoBody> },
+  TContext
+> => {
+  return useMutation(getUpdateOrderInfoMutationOptions(options));
 };
 
 /**

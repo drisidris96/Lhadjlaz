@@ -219,6 +219,47 @@ export const UpdateOrderStatusResponse = zod.object({
 });
 
 /**
+ * @summary Update customer info on an order (admin only)
+ */
+export const UpdateOrderInfoParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateOrderInfoBody = zod.object({
+  firstName: zod.string().min(1).optional(),
+  lastName: zod.string().min(1).optional(),
+  phone: zod.string().min(1).optional(),
+  wilaya: zod.string().optional(),
+  address: zod.string().min(1).optional(),
+  quantity: zod.number().min(1).optional(),
+  notes: zod.string().optional(),
+});
+
+export const UpdateOrderInfoResponse = zod.object({
+  id: zod.number(),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  address: zod.string(),
+  phone: zod.string(),
+  wilaya: zod.string().optional(),
+  productId: zod.number(),
+  productName: zod.string(),
+  quantity: zod.number(),
+  totalPrice: zod.number(),
+  status: zod.enum([
+    "pending",
+    "confirmed",
+    "shipped",
+    "out_for_delivery",
+    "delivered",
+    "cancelled",
+  ]),
+  notes: zod.string().optional(),
+  trackingNumber: zod.string().optional(),
+  createdAt: zod.string(),
+});
+
+/**
  * @summary Admin login
  */
 export const AdminLoginBody = zod.object({

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import {
   useListOrders,
   useUpdateOrderStatus,
+  useUpdateOrderInfo,
   useAdminMe,
   useImportDhdTracking,
   getListOrdersQueryKey,
@@ -12,10 +13,38 @@ import { AdminLayout } from "@/components/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingBag, Check, X, Inbox, Archive, Download, Upload } from "lucide-react";
+import {
+  ShoppingBag,
+  Check,
+  X,
+  Inbox,
+  Archive,
+  Download,
+  Upload,
+  Pencil,
+  Loader2,
+} from "lucide-react";
 import { formatDZD } from "@/lib/utils";
-import { ORDER_STATUS_ARABIC } from "@/lib/constants";
+import { ORDER_STATUS_ARABIC, ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT } from "@/lib/constants";
 import type { UpdateOrderStatusBodyStatus } from "@workspace/api-client-react/generated";
 
 export default function AdminOrders() {
@@ -24,6 +53,17 @@ export default function AdminOrders() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
+  const [editingOrderId, setEditingOrderId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    wilaya: "",
+    commune: "",
+    addressRest: "",
+    quantity: 1,
+    notes: "",
+  });
 
   const { data: session, isLoading: sessionLoading } = useAdminMe();
 
@@ -144,6 +184,80 @@ export default function AdminOrders() {
       data: { status: status as UpdateOrderStatusBodyStatus },
     });
   };
+
+  const updateInfo = useUpdateOrderInfo({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: "تم تحديث معلومات الزبون" });
+        queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey() });
+        setEditingOrderId(null);
+      },
+      onError: () => {
+        toast({
+          variant: "destructive",
+          title: "تعذّر حفظ التعديلات",
+          description: "تأكد من ملء كل الحقول الإلزامية",
+        });
+      },
+    },
+  });
+
+  const openEditDialog = (order: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    wilaya?: string | null;
+    address: string;
+    quantity: number;
+    notes?: string | null;
+  }) => {
+    const idx = (order.address || "").indexOf(" - ");
+    const commune = idx === -1 ? "" : order.address.slice(0, idx).trim();
+    const addressRest = idx === -1 ? order.address : order.address.slice(idx + 3).trim();
+    setEditForm({
+      firstName: order.firstName,
+      lastName: order.lastName,
+      phone: order.phone,
+      wilaya: order.wilaya ?? "",
+      commune,
+      addressRest,
+      quantity: order.quantity,
+      notes: order.notes ?? "",
+    });
+    setEditingOrderId(order.id);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingOrderId === null) return;
+    if (!editForm.firstName.trim() || !editForm.lastName.trim() || !editForm.phone.trim()) {
+      toast({
+        variant: "destructive",
+        title: "حقول ناقصة",
+        description: "الاسم واللقب ورقم الهاتف إلزامية",
+      });
+      return;
+    }
+    const fullAddress = editForm.commune
+      ? `${editForm.commune} - ${editForm.addressRest}`.trim()
+      : editForm.addressRest.trim();
+    updateInfo.mutate({
+      id: editingOrderId,
+      data: {
+        firstName: editForm.firstName.trim(),
+        lastName: editForm.lastName.trim(),
+        phone: editForm.phone.trim(),
+        wilaya: editForm.wilaya || undefined,
+        address: fullAddress,
+        quantity: editForm.quantity,
+        notes: editForm.notes,
+      },
+    });
+  };
+
+  const communeOptions = editForm.wilaya
+    ? ALGERIAN_BALADIYAT[editForm.wilaya] ?? []
+    : [];
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -348,7 +462,18 @@ export default function AdminOrders() {
                           )}
                         </td>
                         <td className="p-4 align-middle">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                              size="default"
+                              variant="outline"
+                              className="border-amber-500 text-amber-700 hover:bg-amber-50 font-bold shadow-sm"
+                              disabled={updateStatus.isPending}
+                              onClick={() => openEditDialog(order)}
+                              data-testid={`button-edit-${order.id}`}
+                            >
+                              <Pencil className="w-4 h-4 ml-1" />
+                              تعديل
+                            </Button>
                             <Button
                               size="default"
                               className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold shadow-md hover:shadow-lg transition-all"
@@ -394,6 +519,171 @@ export default function AdminOrders() {
             )}
           </CardContent>
         </Card>
+
+        {/* ============== Dialog تعديل معلومات الزبون ============== */}
+        <Dialog
+          open={editingOrderId !== null}
+          onOpenChange={(open) => {
+            if (!open) setEditingOrderId(null);
+          }}
+        >
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="text-xl">
+                تعديل معلومات الزبون - طلبية #{editingOrderId}
+              </DialogTitle>
+              <DialogDescription>
+                صحّح أي معلومات غير صحيحة قبل قبول الطلبية
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-firstName">الاسم *</Label>
+                <Input
+                  id="edit-firstName"
+                  value={editForm.firstName}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, firstName: e.target.value })
+                  }
+                  data-testid="input-edit-firstname"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-lastName">اللقب *</Label>
+                <Input
+                  id="edit-lastName"
+                  value={editForm.lastName}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, lastName: e.target.value })
+                  }
+                  data-testid="input-edit-lastname"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phone">رقم الهاتف *</Label>
+                <Input
+                  id="edit-phone"
+                  value={editForm.phone}
+                  dir="ltr"
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, phone: e.target.value })
+                  }
+                  data-testid="input-edit-phone"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-quantity">الكمية</Label>
+                <Input
+                  id="edit-quantity"
+                  type="number"
+                  min={1}
+                  value={editForm.quantity}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      quantity: Math.max(1, parseInt(e.target.value || "1", 10)),
+                    })
+                  }
+                  data-testid="input-edit-quantity"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-wilaya">الولاية</Label>
+                <Select
+                  value={editForm.wilaya}
+                  onValueChange={(value) =>
+                    setEditForm({ ...editForm, wilaya: value, commune: "" })
+                  }
+                >
+                  <SelectTrigger id="edit-wilaya" data-testid="select-edit-wilaya">
+                    <SelectValue placeholder="اختر الولاية" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {ALGERIAN_WILAYAS.map((w) => (
+                      <SelectItem key={w} value={w}>
+                        {w}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-commune">البلدية</Label>
+                <Select
+                  value={editForm.commune}
+                  onValueChange={(value) =>
+                    setEditForm({ ...editForm, commune: value })
+                  }
+                  disabled={communeOptions.length === 0}
+                >
+                  <SelectTrigger id="edit-commune" data-testid="select-edit-commune">
+                    <SelectValue
+                      placeholder={
+                        editForm.wilaya ? "اختر البلدية" : "اختر الولاية أولاً"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {communeOptions.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="edit-address">العنوان التفصيلي</Label>
+                <Input
+                  id="edit-address"
+                  value={editForm.addressRest}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, addressRest: e.target.value })
+                  }
+                  placeholder="الحي، الشارع، نقطة المعلَم..."
+                  data-testid="input-edit-address"
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="edit-notes">ملاحظات</Label>
+                <Textarea
+                  id="edit-notes"
+                  rows={2}
+                  value={editForm.notes}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, notes: e.target.value })
+                  }
+                  data-testid="input-edit-notes"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setEditingOrderId(null)}
+                disabled={updateInfo.isPending}
+                data-testid="button-cancel-edit"
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                disabled={updateInfo.isPending}
+                className="bg-primary text-primary-foreground font-bold"
+                data-testid="button-save-edit"
+              >
+                {updateInfo.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                    جاري الحفظ...
+                  </>
+                ) : (
+                  "حفظ التعديلات"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* ============== الطلبات المؤكَّدة والملغاة ============== */}
         <Card>

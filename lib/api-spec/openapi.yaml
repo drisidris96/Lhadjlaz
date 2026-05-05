@@ -204,6 +204,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+    patch:
+      operationId: updateOrderInfo
+      tags: [orders]
+      summary: Update customer info on an order (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderInfoBody"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
 
   /admin/login:
     post:
@@ -554,6 +577,29 @@ components:
           enum: [pending, confirmed, shipped, out_for_delivery, delivered, cancelled]
       required:
         - status
+
+    UpdateOrderInfoBody:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+        wilaya:
+          type: string
+        address:
+          type: string
+          minLength: 1
+        quantity:
+          type: integer
+          minimum: 1
+        notes:
+          type: string
 
     AdminLoginBody:
       type: object

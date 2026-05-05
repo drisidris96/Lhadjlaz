@@ -21,6 +21,7 @@ export * from "./order";
 export * from "./orderStatus";
 export * from "./product";
 export * from "./storeStats";
+export * from "./updateOrderInfoBody";
 export * from "./updateOrderStatusBody";
 export * from "./updateOrderStatusBodyStatus";
 export * from "./updateProductBody";

@@ -96,6 +96,21 @@ export interface UpdateOrderStatusBody {
   status: UpdateOrderStatusBodyStatus;
 }
 
+export interface UpdateOrderInfoBody {
+  /** @minLength 1 */
+  firstName?: string;
+  /** @minLength 1 */
+  lastName?: string;
+  /** @minLength 1 */
+  phone?: string;
+  wilaya?: string;
+  /** @minLength 1 */
+  address?: string;
+  /** @minimum 1 */
+  quantity?: number;
+  notes?: string;
+}
+
 export interface AdminLoginBody {
   username: string;
   password: string;
