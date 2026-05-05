@@ -18,6 +18,7 @@ import {
   Loader2,
   Bookmark,
   Smartphone,
+  Zap,
 } from "lucide-react";
 
 type SyncResult = {
@@ -34,6 +35,108 @@ const STATUS_LABELS: Record<string, string> = {
   cash_ready: "مسترجعة غير مدفوعة",
 };
 
+function buildUserscript(apiOrigin: string): string {
+  return `// ==UserScript==
+// @name         Lhadj Laz - DHD Auto Sync
+// @namespace    ${apiOrigin}
+// @version      1.0
+// @description  مزامنة تلقائية لحالات DHD مع لوحة إدارة الحاج لاز كل 5 دقائق
+// @match        https://platform.dhd-dz.com/*
+// @grant        none
+// @run-at       document-idle
+// ==/UserScript==
+
+(function () {
+  'use strict';
+  if (window.__lhadjlazAutoSync) return;
+  window.__lhadjlazAutoSync = true;
+
+  var TARGET = '${apiOrigin}/api/admin/dhd/sync-statuses';
+  var INTERVAL_MS = 5 * 60 * 1000;
+  var T = {
+    shipped: ['/valid/orders/list'],
+    out_for_delivery: ['/livraisons/list', '/stopdesk/list'],
+    pending_delivery: ['/livraisons/suspendu/list'],
+    delivered: ['/livraison/non/encaisse/list', '/livraison/cashOut/list', '/livraison/cashin/list', '/livraison/cashin/history/list'],
+    cash_ready: ['/livraison/cashOut/list']
+  };
+
+  var badge = document.createElement('div');
+  badge.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:2147483647;background:rgba(0,0,0,.85);color:#fff;padding:8px 14px;border-radius:8px;font:13px/1.4 -apple-system,sans-serif;direction:rtl;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);user-select:none';
+  badge.textContent = 'مزامنة DHD: في الانتظار...';
+  badge.title = 'اضغط لمزامنة فورية';
+  function setBadge(text, color) {
+    badge.textContent = text;
+    badge.style.background = color || 'rgba(0,0,0,.85)';
+  }
+  function attach() {
+    if (document.body) document.body.appendChild(badge);
+    else setTimeout(attach, 500);
+  }
+  attach();
+
+  var running = false;
+  async function syncNow() {
+    if (running) return;
+    running = true;
+    setBadge('🔄 جاري مزامنة DHD...', '#1d4ed8');
+    var out = {};
+    var errs = [];
+    for (var k of Object.keys(T)) {
+      var all = new Set();
+      for (var p of T[k]) {
+        try {
+          var r = await fetch('https://platform.dhd-dz.com' + p, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+            body: 'draw=1&start=0&length=10000'
+          });
+          if (!r.ok) { errs.push(p + ' HTTP ' + r.status); continue; }
+          var j = await r.json();
+          var txt = JSON.stringify(j.data || []);
+          var m, re = /DHD[A-Z0-9]{12,}/g;
+          while ((m = re.exec(txt)) !== null) all.add(m[0]);
+        } catch (e) { errs.push(p + ' ' + e.message); }
+      }
+      out[k] = [...all];
+    }
+    var total = Object.values(out).reduce(function (s, a) { return s + a.length; }, 0);
+    if (total === 0) {
+      setBadge('⚠️ لا توجد طلبيات DHD' + (errs.length ? ' • ' + errs.length + ' خطأ' : ''), '#b45309');
+      running = false;
+      return;
+    }
+    try {
+      var rr = await fetch(TARGET, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statuses: out })
+      });
+      if (!rr.ok) {
+        if (rr.status === 401) setBadge('🔒 سجّل دخول الحاج لاز أولاً', '#b91c1c');
+        else setBadge('❌ فشلت المزامنة (HTTP ' + rr.status + ')', '#b91c1c');
+        running = false;
+        return;
+      }
+      var data = await rr.json();
+      var t = new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
+      setBadge('✓ ' + (data.updated || 0) + ' محدّثة • ' + t, '#15803d');
+    } catch (e) {
+      setBadge('❌ خطأ شبكة: ' + (e.message || e), '#b91c1c');
+    } finally {
+      running = false;
+    }
+  }
+
+  badge.addEventListener('click', syncNow);
+  setTimeout(syncNow, 4000);
+  setInterval(syncNow, INTERVAL_MS);
+})();
+`;
+}
+
 function buildBookmarklet(receiverUrl: string): string {
   const code = `(async function(){var T={shipped:['/valid/orders/list'],out_for_delivery:['/livraisons/list','/stopdesk/list'],pending_delivery:['/livraisons/suspendu/list'],delivered:['/livraison/non/encaisse/list','/livraison/cashOut/list','/livraison/cashin/list','/livraison/cashin/history/list'],cash_ready:['/livraison/cashOut/list']};var out={};var errs=[];for(var k of Object.keys(T)){var all=new Set();for(var p of T[k]){try{var r=await fetch('https://platform.dhd-dz.com'+p,{method:'POST',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:'draw=1&start=0&length=10000'});if(!r.ok){errs.push(p+' HTTP '+r.status);continue}var j=await r.json();var txt=JSON.stringify(j.data||[]);var m,re=/DHD[A-Z0-9]{12,}/g;while((m=re.exec(txt))!==null)all.add(m[0])}catch(e){errs.push(p+' '+e.message)}}out[k]=[...all]}var total=Object.values(out).reduce(function(s,a){return s+a.length},0);if(total===0){alert('Aucun colis trouvé. Erreurs: '+errs.join(', '));return}var d=btoa(unescape(encodeURIComponent(JSON.stringify(out))));window.open('${receiverUrl}#data='+d,'_blank')})();`;
   return "javascript:" + code;
@@ -48,6 +151,7 @@ export default function AdminDhdSync() {
   const [autoSyncTriggered, setAutoSyncTriggered] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [scriptCopied, setScriptCopied] = useState(false);
 
   const receiverUrl = useMemo(() => {
     const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -55,6 +159,10 @@ export default function AdminDhdSync() {
   }, []);
 
   const bookmarklet = useMemo(() => buildBookmarklet(receiverUrl), [receiverUrl]);
+  const userscript = useMemo(
+    () => buildUserscript(window.location.origin),
+    [],
+  );
 
   const sync = useSyncDhdStatuses({
     mutation: {
@@ -123,6 +231,21 @@ export default function AdminDhdSync() {
     }
   };
 
+  const handleCopyScript = async () => {
+    try {
+      await navigator.clipboard.writeText(userscript);
+      setScriptCopied(true);
+      toast({ title: "تم نسخ سكربت المزامنة التلقائية" });
+      setTimeout(() => setScriptCopied(false), 2000);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "تعذّر النسخ",
+        description: "انسخ الكود يدوياً من المربع",
+      });
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -132,7 +255,97 @@ export default function AdminDhdSync() {
             مزامنة حالات DHD
           </h1>
           <p className="text-muted-foreground mt-1">
-            استخرج حالات الطلبيات من منصة DHD على هاتفك بضغطة واحدة (Bookmarklet)
+            مزامنة تلقائية كل 5 دقائق (Userscript) أو يدوية بضغطة واحدة (Bookmarklet)
+          </p>
+        </div>
+
+        <Card className="border-2 border-emerald-300 bg-emerald-50/50">
+          <CardHeader className="border-b border-emerald-200">
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-emerald-600" />
+              المزامنة التلقائية (موصى بها) — كل 5 دقائق
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4 text-sm">
+            <div className="bg-white border border-emerald-200 rounded p-3 text-emerald-900">
+              <strong>كيف تعمل:</strong> طالما تبويب{" "}
+              <code className="bg-emerald-100 px-1 rounded">
+                platform.dhd-dz.com
+              </code>{" "}
+              مفتوح في متصفحك (ولو في الخلفية)، سيتم سحب كل أرقام التتبع وتحديث
+              حالاتها هنا تلقائياً كل 5 دقائق — بدون أي ضغطة.
+            </div>
+
+            <ol className="list-decimal pr-5 space-y-2">
+              <li>
+                ثبّت إضافة <strong>Tampermonkey</strong> في Kiwi Browser
+                (متوفّرة في متجر Chrome).
+              </li>
+              <li>
+                انسخ السكربت أدناه ثم افتح Tampermonkey →{" "}
+                <strong>Create a new script</strong> → الصق الكود → احفظ
+                (Ctrl+S).
+              </li>
+              <li>
+                افتح <code className="bg-muted px-1 rounded">platform.dhd-dz.com</code> وسجّل
+                الدخول. ستظهر شارة سوداء أسفل الصفحة تعرض حالة المزامنة.
+              </li>
+              <li>
+                سجّل الدخول هنا أيضاً (لوحة الحاج لاز) في نفس المتصفح، حتى تنجح
+                المزامنة.
+              </li>
+            </ol>
+
+            <div className="bg-muted rounded-md p-3">
+              <textarea
+                readOnly
+                value={userscript}
+                className="w-full h-48 font-mono text-xs bg-background border rounded p-2 resize-none"
+                dir="ltr"
+                onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+                data-testid="userscript-code"
+              />
+            </div>
+
+            <Button
+              onClick={handleCopyScript}
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+              data-testid="button-copy-userscript"
+            >
+              {scriptCopied ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  تم النسخ ✓
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  نسخ سكربت المزامنة التلقائية
+                </>
+              )}
+            </Button>
+
+            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-amber-900 text-xs space-y-1">
+              <div>
+                <strong>نصيحة:</strong> اضغط على الشارة السوداء في صفحة DHD
+                لإطلاق مزامنة فورية بدون انتظار.
+              </div>
+              <div>
+                إذا أغلقت تبويب DHD، تتوقف المزامنة. أبقِه مفتوحاً (يكفي في
+                الخلفية).
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="border-t border-border my-2" />
+
+        <div>
+          <h2 className="text-xl font-semibold text-muted-foreground">
+            الخيار اليدوي (Bookmarklet)
+          </h2>
+          <p className="text-sm text-muted-foreground/80 mt-1">
+            للمزامنة بضغطة واحدة بدون تثبيت أي إضافة.
           </p>
         </div>
 
