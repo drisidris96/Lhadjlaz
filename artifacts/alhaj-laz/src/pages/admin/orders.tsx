@@ -776,6 +776,17 @@ export default function AdminOrders() {
                         </td>
                         <td className="p-4 align-middle">
                           <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-amber-500 text-amber-700 hover:bg-amber-50 font-bold shadow-sm whitespace-nowrap w-full"
+                              disabled={updateStatus.isPending}
+                              onClick={() => openEditDialog(order)}
+                              data-testid={`button-edit-processed-${order.id}`}
+                            >
+                              <Pencil className="w-4 h-4 ml-1" />
+                              تعديل
+                            </Button>
                             {PROCESSED_STATUSES.map((status) => {
                               const isActive = order.status === status;
                               const styles = STATUS_BUTTON_STYLES[status];
