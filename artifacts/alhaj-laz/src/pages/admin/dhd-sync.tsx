@@ -278,13 +278,13 @@ export default function AdminDhdSync() {
 
             <ol className="list-decimal pr-5 space-y-2">
               <li>
-                ثبّت إضافة <strong>Tampermonkey</strong> في Kiwi Browser
-                (متوفّرة في متجر Chrome).
+                ثبّت إضافة <strong>Tampermonkey</strong> في Kiwi Browser من
+                متجر Chrome.
               </li>
               <li>
-                انسخ السكربت أدناه ثم افتح Tampermonkey →{" "}
-                <strong>Create a new script</strong> → الصق الكود → احفظ
-                (Ctrl+S).
+                اضغط الزر الأخضر بالأسفل: <strong>"تثبيت السكربت بنقرة
+                واحدة"</strong> — سيفتح Tampermonkey صفحة التثبيت تلقائياً،
+                اضغط <strong>Install</strong>.
               </li>
               <li>
                 افتح <code className="bg-muted px-1 rounded">platform.dhd-dz.com</code> وسجّل
@@ -296,34 +296,57 @@ export default function AdminDhdSync() {
               </li>
             </ol>
 
-            <div className="bg-muted rounded-md p-3">
-              <textarea
-                readOnly
-                value={userscript}
-                className="w-full h-48 font-mono text-xs bg-background border rounded p-2 resize-none"
-                dir="ltr"
-                onClick={(e) => (e.target as HTMLTextAreaElement).select()}
-                data-testid="userscript-code"
-              />
-            </div>
-
-            <Button
-              onClick={handleCopyScript}
-              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-              data-testid="button-copy-userscript"
+            <a
+              href={`${window.location.origin}/dhd-sync.user.js`}
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-md shadow-md text-base"
+              data-testid="link-install-userscript"
             >
-              {scriptCopied ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  تم النسخ ✓
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  نسخ سكربت المزامنة التلقائية
-                </>
-              )}
-            </Button>
+              <Zap className="w-5 h-5" />
+              تثبيت السكربت بنقرة واحدة
+            </a>
+
+            <details className="text-xs">
+              <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                التثبيت اليدوي (إذا لم يعمل التثبيت بنقرة واحدة)
+              </summary>
+              <div className="mt-3 space-y-3">
+                <div className="bg-amber-50 border border-amber-200 rounded p-3 text-amber-900">
+                  <strong>مهم:</strong> عند فتح Tampermonkey →{" "}
+                  <strong>Create a new script</strong>، يظهر قالب افتراضي.
+                  <strong> احذف كل محتوى المحرر أولاً</strong> ثم الصق الكود
+                  أدناه، وإلا ستظهر رسالة "Invalid Userscript".
+                </div>
+                <div className="bg-muted rounded-md p-3">
+                  <textarea
+                    readOnly
+                    value={userscript}
+                    className="w-full h-48 font-mono text-xs bg-background border rounded p-2 resize-none"
+                    dir="ltr"
+                    onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+                    data-testid="userscript-code"
+                  />
+                </div>
+                <Button
+                  onClick={handleCopyScript}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  data-testid="button-copy-userscript"
+                >
+                  {scriptCopied ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      تم النسخ ✓
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      نسخ السكربت
+                    </>
+                  )}
+                </Button>
+              </div>
+            </details>
 
             <div className="bg-amber-50 border border-amber-200 rounded p-3 text-amber-900 text-xs space-y-1">
               <div>
