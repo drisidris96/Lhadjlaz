@@ -74,9 +74,20 @@ export default function TrackOrder() {
   const [dhdLoading, setDhdLoading] = useState(false);
   const [dhdError, setDhdError] = useState<string | null>(null);
 
+  const DONE_STATUSES = ["delivered", "cash_ready", "cancelled"];
+
   const { data, isLoading, isError } = useTrackOrder(
     searchId ?? 0,
-    { query: { enabled: searchId !== null } }
+    {
+      query: {
+        enabled: searchId !== null,
+        refetchInterval: (query) => {
+          const d = query.state.data as typeof data | undefined;
+          if (!d) return searchId !== null ? 30000 : false;
+          return DONE_STATUSES.includes(d.status) ? false : 30000;
+        },
+      },
+    }
   );
 
   useEffect(() => {
@@ -186,6 +197,13 @@ export default function TrackOrder() {
               </CardHeader>
               <CardContent className="pt-5 space-y-5">
                 <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">{info.desc}</p>
+
+                {!DONE_STATUSES.includes(data.status) && (
+                  <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
+                    تتحدث تلقائياً كل 30 ثانية
+                  </p>
+                )}
 
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="bg-muted/40 rounded-lg p-3">
