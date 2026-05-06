@@ -8,6 +8,8 @@ import Home from "@/pages/home";
 import Products from "@/pages/products";
 import ProductDetail from "@/pages/product-detail";
 import OrderPage from "@/pages/order";
+import Store from "@/pages/store";
+import TrackOrder from "@/pages/track";
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
@@ -17,6 +19,9 @@ import AdminDhd from "@/pages/admin/dhd";
 import AdminDhdSync from "@/pages/admin/dhd-sync";
 import AdminDhdPayments from "@/pages/admin/dhd-payments";
 import AdminDhdOrders from "@/pages/admin/dhd-orders";
+import AdminReports from "@/pages/admin/reports";
+import AdminCustomers from "@/pages/admin/customers";
+import AdminInventory from "@/pages/admin/inventory";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +29,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/store" component={Store} />
+      <Route path="/track" component={TrackOrder} />
       <Route path="/products" component={Products} />
       <Route path="/products/:id" component={ProductDetail} />
       <Route path="/order/:productId" component={OrderPage} />
@@ -32,6 +39,9 @@ function Router() {
       <Route path="/admin/products" component={AdminProducts} />
       <Route path="/admin/orders" component={AdminOrders} />
       <Route path="/admin/orders-list" component={AdminOrdersList} />
+      <Route path="/admin/reports" component={AdminReports} />
+      <Route path="/admin/customers" component={AdminCustomers} />
+      <Route path="/admin/inventory" component={AdminInventory} />
       <Route path="/admin/dhd" component={AdminDhd} />
       <Route path="/admin/dhd-sync" component={AdminDhdSync} />
       <Route path="/admin/dhd-payments" component={AdminDhdPayments} />
