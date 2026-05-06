@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   ShoppingBag, Search, Package, CheckCircle2, X,
   Home, Building2, Phone, MapPin, Truck, Tag,
-  ArrowRight, Star, ChevronLeft,
+  ArrowRight, LayoutGrid, PackageSearch, Lock,
 } from "lucide-react";
 import { Link } from "wouter";
 import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT, DHD_PRICES, DHD_OFFICES } from "@/lib/constants";
@@ -95,34 +95,63 @@ export default function Store() {
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
 
-      {/* ── Hero Header ───────────────────────────────────── */}
-      <div className="bg-gradient-to-l from-yellow-600 via-primary to-amber-500 text-white">
-        <div className="max-w-2xl mx-auto px-4 pt-5 pb-4">
-          {/* top row */}
-          <div className="flex items-center justify-between mb-4">
-            <Link href="/track">
-              <button className="flex items-center gap-1 bg-white/20 hover:bg-white/30 transition-colors rounded-full px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
-                تتبع طلبيتي <ArrowRight className="w-3 h-3" />
+      {/* ── Navbar ────────────────────────────────────────── */}
+      <header className="bg-white border-b shadow-sm sticky top-0 z-20">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+          {/* Left — admin login */}
+          <Link href="/admin/login">
+            <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-primary transition-colors border border-gray-200 hover:border-primary/40 rounded-full px-3 py-1.5">
+              <Lock className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">الإدارة</span>
+            </button>
+          </Link>
+
+          {/* Center — nav links */}
+          <nav className="flex items-center gap-1">
+            <Link href="/">
+              <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold text-gray-600 hover:text-primary hover:bg-primary/5 transition-all">
+                <Home className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">الرئيسية</span>
               </button>
             </Link>
-            <span className="text-xl font-black tracking-wide">الحاج لاز</span>
-          </div>
+            <Link href="/store">
+              <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold bg-primary text-white shadow-sm">
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>المنتجات</span>
+              </button>
+            </Link>
+            <Link href="/track">
+              <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold text-gray-600 hover:text-primary hover:bg-primary/5 transition-all">
+                <PackageSearch className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">تتبع الطلبات</span>
+              </button>
+            </Link>
+          </nav>
 
-          {/* tagline */}
-          <div className="mb-4">
-            <p className="text-white/80 text-sm">المورد الأول لتجار الملابس في الجزائر 🇩🇿</p>
-            <h1 className="text-2xl font-black mt-1 leading-tight">اطلب بالجملة<br />ونوصل لكل الولايات</h1>
-          </div>
+          {/* Right — logo */}
+          <Link href="/">
+            <span className="text-xl font-black text-primary tracking-wide cursor-pointer">الحاج لاز</span>
+          </Link>
+        </div>
+      </header>
 
-          {/* search */}
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="ابحث عن منتج..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="pr-10 h-11 bg-white border-0 rounded-xl shadow-lg text-gray-800 placeholder:text-gray-400 focus-visible:ring-0"
-            />
+      {/* ── Hero Banner ───────────────────────────────────── */}
+      <div className="bg-gradient-to-l from-yellow-600 via-primary to-amber-500 text-white">
+        <div className="max-w-5xl mx-auto px-4 pt-5 pb-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="ابحث عن منتج..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pr-10 h-11 bg-white border-0 rounded-xl shadow-lg text-gray-800 placeholder:text-gray-400 focus-visible:ring-0"
+              />
+            </div>
+            <div className="text-right">
+              <p className="text-white/80 text-xs">المورد الأول لتجار الملابس في الجزائر 🇩🇿</p>
+              <h1 className="text-xl font-black leading-tight mt-0.5">اطلب بالجملة ونوصل لكل الولايات</h1>
+            </div>
           </div>
         </div>
       </div>
