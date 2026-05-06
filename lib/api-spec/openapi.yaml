@@ -163,6 +163,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/Order"
 
+  /orders/track/{id}:
+    get:
+      operationId: trackOrder
+      tags: [orders]
+      summary: Track an order by ID (public, no auth)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order tracking info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderTrackResponse"
+        "404":
+          description: Not found
+
   /orders/{id}:
     get:
       operationId: getOrder
@@ -776,6 +797,29 @@ components:
                 type: integer
               trackingNumber:
                 type: string
+
+    OrderTrackResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+        productName:
+          type: string
+        trackingNumber:
+          type: string
+        createdAt:
+          type: string
+        wilaya:
+          type: string
+        firstName:
+          type: string
+      required:
+        - id
+        - status
+        - productName
+        - createdAt
 
     StoreStats:
       type: object
