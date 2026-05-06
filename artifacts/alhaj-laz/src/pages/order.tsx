@@ -5,10 +5,12 @@ import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRight, ShoppingBag, CheckCircle2, Home, Building2, MapPin, Phone, Package } from "lucide-react";
+import {
+  ArrowRight, ShoppingBag, CheckCircle2, Home, Building2,
+  MapPin, Phone, Package, ChevronRight, Truck, Tag,
+} from "lucide-react";
 import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT, DHD_PRICES, DHD_OFFICES } from "@/lib/constants";
 
 type DeliveryType = "home" | "stop_desk";
@@ -54,43 +56,19 @@ export default function OrderPage() {
   });
 
   const handleSubmit = () => {
-    if (!form.deliveryType) {
-      toast({ variant: "destructive", title: "الرجاء اختيار نوع التوصيل" });
-      return;
-    }
-    if (!form.firstName || !form.lastName || !form.phone || !form.wilaya) {
-      toast({ variant: "destructive", title: "الرجاء تعبئة جميع الحقول المطلوبة" });
-      return;
-    }
-    if (form.deliveryType === "home" && (!form.commune || !form.address)) {
-      toast({ variant: "destructive", title: "الرجاء إدخال البلدية والعنوان" });
-      return;
-    }
-    if (!product || qty < product.minOrderQty) {
-      toast({ variant: "destructive", title: `الحد الأدنى للطلب ${product?.minOrderQty ?? 1} قطعة` });
-      return;
-    }
+    if (!form.deliveryType) { toast({ variant: "destructive", title: "الرجاء اختيار نوع التوصيل" }); return; }
+    if (!form.firstName || !form.lastName || !form.phone || !form.wilaya) { toast({ variant: "destructive", title: "الرجاء تعبئة جميع الحقول المطلوبة" }); return; }
+    if (form.deliveryType === "home" && (!form.commune || !form.address)) { toast({ variant: "destructive", title: "الرجاء إدخال البلدية والعنوان" }); return; }
+    if (!product || qty < product.minOrderQty) { toast({ variant: "destructive", title: `الحد الأدنى للطلب ${product?.minOrderQty ?? 1} قطعة` }); return; }
 
-    const address = form.deliveryType === "home"
-      ? `${form.commune} - ${form.address}`
-      : `Stop Desk - ${form.wilaya}`;
+    const address = form.deliveryType === "home" ? `${form.commune} - ${form.address}` : `Stop Desk - ${form.wilaya}`;
     const notes = [
       form.deliveryType === "home" ? "توصيل للمنزل" : "توصيل للمكتب (Stop Desk)",
       form.size ? `المقاس: ${form.size}` : "",
     ].filter(Boolean).join(" | ");
 
     createOrder.mutate({
-      data: {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        phone: form.phone,
-        wilaya: form.wilaya,
-        address,
-        productId,
-        quantity: qty,
-        deliveryPrice: deliveryPrice ?? 0,
-        notes,
-      },
+      data: { firstName: form.firstName, lastName: form.lastName, phone: form.phone, wilaya: form.wilaya, address, productId, quantity: qty, deliveryPrice: deliveryPrice ?? 0, notes },
     });
   };
 
@@ -105,293 +83,356 @@ export default function OrderPage() {
     );
   }
 
-  /* ── Success screen ─────────────────────────────────────────── */
+  /* ── Success ─────────────────────────────────── */
   if (orderId !== null) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-16 max-w-md text-center space-y-5" dir="rtl">
-          <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto" />
-          <h2 className="text-3xl font-black">تم استلام طلبيتك!</h2>
-
-          <div className="bg-primary/10 border border-primary/30 rounded-2xl py-4 px-6">
-            <p className="text-sm text-muted-foreground mb-1">رقم طلبيتك</p>
-            <p className="text-4xl font-black text-primary">#{orderId}</p>
-            <p className="text-xs text-muted-foreground mt-1">احتفظ بهذا الرقم</p>
-          </div>
-
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-right space-y-1">
-            <p className="text-sm font-semibold text-amber-900">📞 سنتصل بك قريباً لتأكيد الطلبية</p>
-            <p className="text-xs text-amber-700">
-              بعد التأكيد يمكنك تتبع طلبيتك برقم <span className="font-bold">#{orderId}</span>
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            <Link href={`/track?id=${orderId}`} className="flex-1">
-              <Button variant="outline" className="w-full">تتبع الطلبية</Button>
-            </Link>
-            <Link href="/products" className="flex-1">
-              <Button className="w-full">متابعة التسوق</Button>
-            </Link>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center px-4" dir="rtl">
+          <div className="w-full max-w-sm space-y-5 text-center">
+            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-green-200">
+              <CheckCircle2 className="w-12 h-12 text-green-500" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-black text-gray-900">تم استلام طلبيتك!</h2>
+              <p className="text-gray-500 mt-1">شكراً لثقتك في الحاج لاز</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-5 px-6">
+              <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">رقم الطلبية</p>
+              <p className="text-5xl font-black text-primary">#{orderId}</p>
+              <p className="text-xs text-gray-400 mt-2">احتفظ بهذا الرقم للتتبع</p>
+            </div>
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-right">
+              <p className="text-sm font-bold text-amber-900">📞 سنتصل بك قريباً لتأكيد الطلبية</p>
+              <p className="text-xs text-amber-700 mt-1">بعد التأكيد يمكنك تتبع طلبيتك برقم <strong>#{orderId}</strong></p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Link href={`/track?id=${orderId}`}><Button variant="outline" className="w-full h-11 font-semibold">تتبع الطلبية</Button></Link>
+              <Link href="/products"><Button className="w-full h-11 font-semibold">تسوق أكثر</Button></Link>
+            </div>
           </div>
         </div>
       </Layout>
     );
   }
 
-  /* ── Order form ─────────────────────────────────────────────── */
+  /* ── Form ────────────────────────────────────── */
+  const step = !form.deliveryType ? 1 : (!form.firstName || !form.phone) ? 2 : 3;
+
   return (
     <Layout>
-      <div className="bg-muted/30 py-3 border-b">
-        <div className="container mx-auto px-4">
+      {/* Top bar */}
+      <div className="bg-white border-b sticky top-0 z-10">
+        <div className="container mx-auto px-4 h-12 flex items-center gap-3">
           <Link href={`/products/${productId}`}>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-1">
+            <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-primary transition-colors">
               <ArrowRight className="w-4 h-4" />
               العودة للمنتج
-            </Button>
+            </button>
           </Link>
+          <ChevronRight className="w-3 h-3 text-gray-300" />
+          <span className="text-sm font-semibold text-gray-800">إتمام الطلب</span>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl" dir="rtl">
-        <h1 className="text-2xl font-black mb-6">إتمام الطلب</h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {/* ── Left: form ───────────────────────────────── */}
-          <div className="lg:col-span-2 space-y-5">
-
-            {/* STEP 1 — Delivery type */}
-            <Card>
-              <CardContent className="p-5 space-y-3">
-                <p className="text-sm font-bold">1. اختر نوع التوصيل</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setForm(p => ({ ...p, deliveryType: "home", wilaya: "", commune: "", address: "" }))}
-                    className={`border rounded-xl p-4 text-right transition-all space-y-1 ${form.deliveryType === "home" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Home className="w-5 h-5 text-primary" />
-                      <span className="font-bold">للمنزل</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">ولاية + بلدية + عنوان</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setForm(p => ({ ...p, deliveryType: "stop_desk", wilaya: "", commune: "", address: "" }))}
-                    className={`border rounded-xl p-4 text-right transition-all space-y-1 ${form.deliveryType === "stop_desk" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-5 h-5 text-primary" />
-                      <span className="font-bold">Stop Desk</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">استلام من المكتب</p>
-                  </button>
+      {/* Steps indicator */}
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center gap-2 justify-center" dir="ltr">
+            {[
+              { n: 1, label: "نوع التوصيل" },
+              { n: 2, label: "معلوماتك" },
+              { n: 3, label: "الولاية" },
+            ].map((s, i, arr) => (
+              <div key={s.n} className="flex items-center gap-2">
+                <div className={`flex items-center gap-1.5 ${step >= s.n ? "text-primary" : "text-gray-300"}`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step > s.n ? "bg-primary text-white" : step === s.n ? "bg-primary/10 text-primary border-2 border-primary" : "bg-gray-100 text-gray-400"}`}>
+                    {step > s.n ? "✓" : s.n}
+                  </div>
+                  <span className="text-xs font-medium hidden sm:block">{s.label}</span>
                 </div>
-              </CardContent>
-            </Card>
+                {i < arr.length - 1 && <div className={`w-8 h-px ${step > s.n ? "bg-primary" : "bg-gray-200"}`} />}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-            {form.deliveryType && (
-              <>
-                {/* STEP 2 — Personal info */}
-                <Card>
-                  <CardContent className="p-5 space-y-4">
-                    <p className="text-sm font-bold">2. معلوماتك الشخصية</p>
-                    <div className="grid grid-cols-2 gap-4">
+      <div className="bg-gray-50 min-h-screen">
+        <div className="container mx-auto px-4 py-6 max-w-4xl" dir="rtl">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
+
+            {/* ── Form column ── */}
+            <div className="lg:col-span-3 space-y-4">
+
+              {/* STEP 1 — Delivery type */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-l from-primary/5 to-transparent px-5 py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
+                    <p className="font-bold text-gray-800">اختر نوع التوصيل</p>
+                  </div>
+                </div>
+                <div className="p-4 grid grid-cols-2 gap-3">
+                  {[
+                    { type: "home" as const, icon: Home, title: "للمنزل", sub: "ولاية + بلدية + عنوان" },
+                    { type: "stop_desk" as const, icon: Building2, title: "Stop Desk", sub: "استلام من المكتب" },
+                  ].map(({ type, icon: Icon, title, sub }) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, deliveryType: type, wilaya: "", commune: "", address: "" }))}
+                      className={`relative rounded-xl p-4 text-right transition-all border-2 ${form.deliveryType === type ? "border-primary bg-primary/5 shadow-sm" : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white"}`}
+                    >
+                      {form.deliveryType === type && (
+                        <span className="absolute top-2 left-2 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">✓</span>
+                        </span>
+                      )}
+                      <Icon className={`w-6 h-6 mb-2 ${form.deliveryType === type ? "text-primary" : "text-gray-400"}`} />
+                      <p className={`font-bold text-sm ${form.deliveryType === type ? "text-primary" : "text-gray-700"}`}>{title}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {form.deliveryType && (
+                <>
+                  {/* STEP 2 — Personal info */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="bg-gradient-to-l from-primary/5 to-transparent px-5 py-3 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
+                        <p className="font-bold text-gray-800">معلوماتك الشخصية</p>
+                      </div>
+                    </div>
+                    <div className="p-4 grid grid-cols-2 gap-3">
                       {[
-                        { key: "firstName", label: "الاسم الأول" },
-                        { key: "lastName", label: "اسم العائلة" },
+                        { key: "firstName", label: "الاسم الأول", type: "text", placeholder: "الاسم" },
+                        { key: "lastName", label: "اسم العائلة", type: "text", placeholder: "اللقب" },
                       ].map(f => (
-                        <div key={f.key} className="space-y-1">
-                          <Label className="text-xs">{f.label}</Label>
+                        <div key={f.key} className="space-y-1.5">
+                          <Label className="text-xs font-semibold text-gray-600">{f.label}</Label>
                           <Input
+                            placeholder={f.placeholder}
                             value={(form as Record<string, string>)[f.key]}
                             onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                            className="h-10"
+                            className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
                           />
                         </div>
                       ))}
-                      <div className="space-y-1">
-                        <Label className="text-xs">رقم الهاتف</Label>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-gray-600">رقم الهاتف</Label>
                         <Input
-                          type="tel"
-                          dir="ltr"
-                          placeholder="05xx xx xx xx"
+                          type="tel" dir="ltr" placeholder="05xx xx xx xx"
                           value={form.phone}
                           onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
-                          className="h-10"
+                          className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
                         />
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">الكمية (min: {product?.minOrderQty ?? 1})</Label>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-gray-600">الكمية <span className="text-gray-400 font-normal">(min: {product?.minOrderQty ?? 1})</span></Label>
                         <Input
-                          type="number"
-                          min={product?.minOrderQty ?? 1}
+                          type="number" min={product?.minOrderQty ?? 1}
                           value={form.quantity}
                           onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))}
-                          className="h-10"
+                          className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
                         />
                       </div>
-                      <div className="space-y-1 col-span-2">
-                        <Label className="text-xs">المقاس <span className="text-muted-foreground">(اختياري)</span></Label>
+                      <div className="space-y-1.5 col-span-2">
+                        <Label className="text-xs font-semibold text-gray-600">
+                          المقاس <span className="text-gray-400 font-normal">(اختياري)</span>
+                        </Label>
                         <Input
+                          placeholder="مثال: XL، 42، M ..."
                           value={form.size}
                           onChange={e => setForm(p => ({ ...p, size: e.target.value }))}
-                          placeholder="مثال: XL، 42، M ..."
-                          className="h-10"
+                          className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
                         />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                {/* STEP 3 — Wilaya / address */}
-                <Card>
-                  <CardContent className="p-5 space-y-3">
-                    <p className="text-sm font-bold">
-                      3. {form.deliveryType === "home" ? "الولاية والبلدية" : "اختر الولاية"}
-                    </p>
+                  {/* STEP 3 — Location */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="bg-gradient-to-l from-primary/5 to-transparent px-5 py-3 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>
+                        <p className="font-bold text-gray-800">
+                          {form.deliveryType === "home" ? "الولاية والبلدية" : "اختر الولاية"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-gray-600">الولاية</Label>
+                        <select
+                          value={form.wilaya}
+                          onChange={e => setForm(p => ({ ...p, wilaya: e.target.value, commune: "" }))}
+                          className="w-full h-11 border border-gray-200 rounded-xl px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
+                        >
+                          <option value="">اختر الولاية</option>
+                          {(form.deliveryType === "stop_desk" ? STOP_DESK_WILAYAS : ALGERIAN_WILAYAS).map((w: string) => {
+                            const price = DHD_PRICES[w];
+                            const priceVal = form.deliveryType === "home" ? price?.home : price?.stopDesk;
+                            return <option key={w} value={w}>{w}{priceVal ? ` — ${priceVal} د.ج` : ""}</option>;
+                          })}
+                        </select>
+                      </div>
 
-                    <select
-                      value={form.wilaya}
-                      onChange={e => setForm(p => ({ ...p, wilaya: e.target.value, commune: "" }))}
-                      className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background"
-                    >
-                      <option value="">اختر الولاية</option>
-                      {(form.deliveryType === "stop_desk" ? STOP_DESK_WILAYAS : ALGERIAN_WILAYAS).map((w: string) => {
-                        const price = DHD_PRICES[w];
-                        const priceVal = form.deliveryType === "home" ? price?.home : price?.stopDesk;
-                        return (
-                          <option key={w} value={w}>
-                            {w}{priceVal ? ` — ${priceVal} د.ج` : ""}
-                          </option>
-                        );
-                      })}
-                    </select>
-
-                    {/* Commune — home only */}
-                    {form.deliveryType === "home" && form.wilaya && communes.length > 0 && (
-                      <select
-                        value={form.commune}
-                        onChange={e => setForm(p => ({ ...p, commune: e.target.value }))}
-                        className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background"
-                      >
-                        <option value="">اختر البلدية</option>
-                        {communes.map((c: string) => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                    )}
-
-                    {/* Address — home only */}
-                    {form.deliveryType === "home" && form.wilaya && (
-                      <Input
-                        value={form.address}
-                        onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
-                        placeholder="العنوان التفصيلي (الحي، الشارع...)"
-                        className="h-10"
-                      />
-                    )}
-
-                    {/* Office card — stop desk only */}
-                    {form.deliveryType === "stop_desk" && office && (
-                      <div className="border border-primary/30 bg-primary/5 rounded-xl p-4 space-y-3">
-                        <p className="text-xs font-bold text-primary uppercase tracking-wide">عنوان المكتب</p>
-                        <div className="flex gap-2 items-start">
-                          <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                          <p className="text-xs leading-relaxed">{office.address}</p>
+                      {form.deliveryType === "home" && form.wilaya && communes.length > 0 && (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-semibold text-gray-600">البلدية</Label>
+                          <select
+                            value={form.commune}
+                            onChange={e => setForm(p => ({ ...p, commune: e.target.value }))}
+                            className="w-full h-11 border border-gray-200 rounded-xl px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
+                          >
+                            <option value="">اختر البلدية</option>
+                            {communes.map((c: string) => <option key={c} value={c}>{c}</option>)}
+                          </select>
                         </div>
-                        <div className="flex gap-2 items-center">
-                          <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                          <p className="text-xs font-mono" dir="ltr">{office.phone}</p>
+                      )}
+
+                      {form.deliveryType === "home" && form.wilaya && (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-semibold text-gray-600">العنوان التفصيلي</Label>
+                          <Input
+                            value={form.address}
+                            onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
+                            placeholder="الحي، الشارع، رقم المبنى..."
+                            className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
+                          />
+                        </div>
+                      )}
+
+                      {form.deliveryType === "stop_desk" && office && (
+                        <div className="bg-gradient-to-br from-primary/8 to-primary/3 border border-primary/20 rounded-xl p-4 space-y-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Building2 className="w-4 h-4 text-primary" />
+                            <p className="text-xs font-bold text-primary">عنوان مكتب الاستلام</p>
+                          </div>
+                          <div className="flex gap-2 items-start">
+                            <MapPin className="w-4 h-4 text-primary/60 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-gray-700 leading-relaxed">{office.address}</p>
+                          </div>
+                          <div className="flex gap-2 items-center">
+                            <Phone className="w-4 h-4 text-primary/60 flex-shrink-0" />
+                            <p className="text-xs font-mono text-gray-700" dir="ltr">{office.phone}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Delivery cost pill */}
+                  {deliveryPrice !== null && (
+                    <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                      <Truck className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-xs text-amber-700 font-medium">
+                          {form.deliveryType === "home" ? "تكلفة التوصيل للمنزل" : "تكلفة Stop Desk"}
+                        </p>
+                      </div>
+                      <span className="font-black text-amber-800 text-lg">{deliveryPrice.toLocaleString("ar-DZ")} <span className="text-xs font-normal">د.ج</span></span>
+                    </div>
+                  )}
+
+                  {/* Submit button */}
+                  <Button
+                    className="w-full h-14 text-base font-black rounded-xl shadow-lg shadow-primary/25 gap-2"
+                    onClick={handleSubmit}
+                    disabled={createOrder.isPending || isLoading}
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    {createOrder.isPending ? "جاري الإرسال..." : "تأكيد الطلبية"}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* ── Summary sidebar ── */}
+            <div className="lg:col-span-2 lg:sticky lg:top-24">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-primary px-4 py-3 flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-white" />
+                  <p className="text-white font-bold text-sm">ملخص الطلبية</p>
+                </div>
+                <div className="p-4">
+                  {isLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 w-full rounded-xl" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                  ) : product ? (
+                    <>
+                      {/* Product card */}
+                      <div className="flex gap-3 p-3 bg-gray-50 rounded-xl mb-4">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-white border border-gray-100 shrink-0">
+                          {product.imageUrl ? (
+                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="w-6 h-6 text-gray-300" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm text-gray-800 line-clamp-2 leading-tight">{product.name}</p>
+                          <p className="text-primary font-bold mt-1">{Number(product.price).toLocaleString("ar-DZ")} <span className="text-xs text-gray-400 font-normal">د.ج / قطعة</span></p>
                         </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
 
-                {/* Delivery cost banner */}
-                {deliveryPrice !== null && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex justify-between items-center">
-                    <span className="text-sm text-amber-800">
-                      {form.deliveryType === "home" ? "تكلفة التوصيل للمنزل" : "تكلفة Stop Desk"}
-                    </span>
-                    <span className="font-bold text-amber-900">{deliveryPrice.toLocaleString("ar-DZ")} د.ج</span>
-                  </div>
-                )}
-
-                <Button
-                  className="w-full h-14 text-lg font-bold gap-2"
-                  onClick={handleSubmit}
-                  disabled={createOrder.isPending || isLoading}
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  {createOrder.isPending ? "جاري الإرسال..." : "تأكيد الطلب"}
-                </Button>
-              </>
-            )}
-          </div>
-
-          {/* ── Right: order summary ──────────────────────── */}
-          <div className="sticky top-24">
-            <Card className="border-primary/20 bg-primary/5 overflow-hidden">
-              <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center gap-2 font-bold">
-                <ShoppingBag className="w-4 h-4" />
-                ملخص الطلبية
-              </div>
-              <CardContent className="p-4 space-y-4">
-                {isLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-5 w-full" />
-                    <Skeleton className="h-5 w-full" />
-                  </div>
-                ) : product ? (
-                  <>
-                    <div className="flex gap-3 items-center">
-                      <div className="w-14 h-14 rounded-lg overflow-hidden bg-background border shrink-0">
-                        {product.imageUrl ? (
-                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package className="w-6 h-6 text-muted-foreground/40" />
+                      {/* Pricing breakdown */}
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center text-gray-500">
+                          <span>سعر الوحدة</span>
+                          <span className="font-semibold text-gray-800">{Number(product.price).toLocaleString("ar-DZ")} د.ج</span>
+                        </div>
+                        <div className="flex justify-between items-center text-gray-500">
+                          <span>الكمية</span>
+                          <span className="font-semibold text-gray-800">{qty || "—"} قطعة</span>
+                        </div>
+                        {qty > 0 && (
+                          <div className="flex justify-between items-center text-gray-500">
+                            <span>مجموع المنتج</span>
+                            <span className="font-semibold text-gray-800">{productTotal.toLocaleString("ar-DZ")} د.ج</span>
                           </div>
                         )}
+                        <div className="flex justify-between items-center text-gray-500">
+                          <span>التوصيل</span>
+                          <span className={`font-semibold ${deliveryPrice !== null ? "text-amber-600" : "text-gray-400"}`}>
+                            {deliveryPrice !== null ? `${deliveryPrice.toLocaleString("ar-DZ")} د.ج` : "اختر الولاية"}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-sm leading-tight line-clamp-2">{product.name}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{Number(product.price).toLocaleString("ar-DZ")} د.ج / قطعة</p>
-                      </div>
-                    </div>
 
-                    <div className="border-t border-primary/10 pt-3 space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">سعر الوحدة</span>
-                        <span className="font-medium">{Number(product.price).toLocaleString("ar-DZ")} د.ج</span>
+                      <div className="mt-4 pt-3 border-t border-dashed border-gray-200">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-gray-800">المجموع الكلي</span>
+                          <div className="text-left">
+                            {deliveryPrice !== null && qty > 0 ? (
+                              <p className="font-black text-2xl text-primary">{grandTotal.toLocaleString("ar-DZ")} <span className="text-sm font-normal text-gray-400">د.ج</span></p>
+                            ) : (
+                              <p className="text-gray-400 text-sm">تحدد لاحقاً</p>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">الكمية</span>
-                        <span className="font-medium">{qty || "—"} قطعة</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">التوصيل</span>
-                        <span className="font-medium">
-                          {deliveryPrice !== null ? `${deliveryPrice.toLocaleString("ar-DZ")} د.ج` : "تحدد لاحقاً"}
-                        </span>
-                      </div>
-                    </div>
 
-                    <div className="border-t border-primary/20 pt-3 flex justify-between items-center">
-                      <span className="font-bold">المجموع</span>
-                      <span className="font-black text-xl text-primary">
-                        {deliveryPrice !== null && qty > 0
-                          ? `${grandTotal.toLocaleString("ar-DZ")} د.ج`
-                          : qty > 0 ? `${productTotal.toLocaleString("ar-DZ")} د.ج` : "—"}
-                      </span>
-                    </div>
-                  </>
-                ) : null}
-              </CardContent>
-            </Card>
+                      {form.size && (
+                        <div className="mt-3 flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                          <Tag className="w-3 h-3 text-gray-400" />
+                          <span className="text-xs text-gray-500">المقاس: <strong className="text-gray-700">{form.size}</strong></span>
+                        </div>
+                      )}
+                    </>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
