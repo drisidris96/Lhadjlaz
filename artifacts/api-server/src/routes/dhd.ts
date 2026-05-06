@@ -24,6 +24,251 @@ function splitAddress(full: string): { commune: string; rest: string } {
   return { commune: full.slice(0, idx).trim(), rest: full.slice(idx + 3).trim() };
 }
 
+// ====== Dynamic UserScript ======
+
+function buildUserScript(origin: string): string {
+  return `\
+// ==UserScript==
+// @name         Lhadj Laz - DHD Auto Sync
+// @namespace    ${origin}/
+// @version      2.1
+// @description  مزامنة تلقائية لحالات DHD مع لوحة إدارة الحاج لاز كل 5 دقائق
+// @match        https://platform.dhd-dz.com/*
+// @grant        none
+// @run-at       document-idle
+// @updateURL    ${origin}/api/dhd-sync.user.js
+// @downloadURL  ${origin}/api/dhd-sync.user.js
+// ==/UserScript==
+
+(function () {
+  'use strict';
+  if (window.__lhadjlazAutoSync) return;
+  window.__lhadjlazAutoSync = true;
+
+  var TARGET = '${origin}/api/admin/dhd/sync-statuses';
+  var INTERVAL_MS = 5 * 60 * 1000;
+
+  // ── Status detection from endpoint URL ──────────────────────────────────
+  function detectStatus(url) {
+    var u = (url || '').toLowerCase();
+    if (/\\/cashin\\/history|\\/cashin(?!\\/list)/.test(u)) return 'delivered';
+    if (/\\/cashin\\/list|\\/cashin\\/history\\/list/.test(u)) return 'delivered';
+    if (/non\\/encaisse/.test(u)) return 'cash_ready';
+    if (/cashout/.test(u)) return 'cash_ready';
+    if (/livr[ée]s?\\/list|\\/livres\\/|\\/livrés\\//.test(u)) return 'delivered';
+    if (/cashin/.test(u)) return 'delivered';
+    if (/suspendu|suspend/.test(u)) return 'pending_delivery';
+    if (/stopdesk|stop.desk/.test(u)) return 'out_for_delivery';
+    if (/livraison/.test(u)) return 'out_for_delivery';
+    if (/valid|pret|prêt|expedition|wilaya|station|order/.test(u)) return 'shipped';
+    return null;
+  }
+
+  // ── Live XHR interception ────────────────────────────────────────────────
+  var liveData = {};
+  var re = /DHD[A-Z0-9]{8,40}/g;
+
+  function addTracking(status, text) {
+    if (!status) return;
+    if (!liveData[status]) liveData[status] = new Set();
+    re.lastIndex = 0;
+    var m;
+    while ((m = re.exec(text)) !== null) liveData[status].add(m[0]);
+  }
+
+  var origOpen = XMLHttpRequest.prototype.open;
+  var origSend = XMLHttpRequest.prototype.send;
+
+  XMLHttpRequest.prototype.open = function (method, url) {
+    this.__lhUrl = String(url || '');
+    this.__lhMethod = String(method || '');
+    return origOpen.apply(this, arguments);
+  };
+
+  XMLHttpRequest.prototype.send = function (body) {
+    var url = this.__lhUrl || '';
+    var method = this.__lhMethod || '';
+    if (
+      method.toUpperCase() === 'POST' &&
+      url.indexOf('/list') !== -1 &&
+      typeof body === 'string' &&
+      body.indexOf('draw=') !== -1
+    ) {
+      var status = detectStatus(url);
+      var self = this;
+      var orig = this.onreadystatechange;
+      this.onreadystatechange = function () {
+        if (self.readyState === 4 && self.status === 200 && status) {
+          try {
+            var d = JSON.parse(self.responseText);
+            if (d && Array.isArray(d.data) && d.data.length > 0) {
+              addTracking(status, JSON.stringify(d.data));
+            }
+          } catch (_) {}
+        }
+        if (orig) orig.apply(self, arguments);
+      };
+    }
+    return origSend.apply(this, arguments);
+  };
+
+  // ── Badge ────────────────────────────────────────────────────────────────
+  var badge = document.createElement('div');
+  badge.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:2147483647;background:rgba(0,0,0,.85);color:#fff;padding:8px 14px;border-radius:8px;font:13px/1.4 -apple-system,sans-serif;direction:rtl;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);user-select:none';
+  badge.textContent = '⏳ DHD: في الانتظار...';
+  badge.title = 'اضغط لمزامنة فورية';
+  function attach() { if (document.body) document.body.appendChild(badge); else setTimeout(attach, 300); }
+  attach();
+  function setBadge(text, color) { badge.textContent = text; badge.style.background = color || 'rgba(0,0,0,.85)'; }
+
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  // ── Auto-click tabs to trigger DataTable loads ───────────────────────────
+  async function clickAllTabs() {
+    var selectors = [
+      '.nav-tabs a', '.nav-pills a', 'ul.nav li a',
+      'a[href*="livraison"]', 'a[href*="valid"]', 'a[href*="livre"]',
+      'a[href*="suspendu"]', 'a[href*="retour"]', 'a[href*="station"]',
+      'a[href*="wilaya"]', 'a[href*="stopdesk"]', 'a[href*="cashin"]',
+      'a[href*="cashout"]', 'a[href*="ramassage"]', 'a[href*="preparation"]',
+    ].join(',');
+    var tabs = Array.from(document.querySelectorAll(selectors));
+    // remove duplicates by href
+    var seen = new Set();
+    tabs = tabs.filter(function (t) {
+      var h = t.getAttribute('href') || '';
+      if (seen.has(h)) return false;
+      seen.add(h);
+      return true;
+    });
+    for (var i = 0; i < tabs.length && i < 15; i++) {
+      try { tabs[i].click(); } catch (_) {}
+      await sleep(1200);
+    }
+    await sleep(1000);
+  }
+
+  // ── Fallback direct fetch (try many URL patterns) ────────────────────────
+  var FALLBACK_PATHS = {
+    shipped: [
+      '/valid/orders/list', '/valid/list', '/pret/list', '/pret-a-expedier/list',
+      '/expedition/list', '/vers-station/list', '/station/list', '/wilaya/list',
+      '/en-ramassage/list', '/preparation/list',
+    ],
+    out_for_delivery: [
+      '/livraisons/list', '/livraison/list', '/stopdesk/list',
+      '/en-livraison/list', '/en-cours/list',
+    ],
+    pending_delivery: [
+      '/livraisons/suspendu/list', '/suspendu/list', '/suspendus/list',
+    ],
+    delivered: [
+      '/livraison/cashin/list', '/livraison/cashin/history/list',
+      '/livraison/non/encaisse/list', '/livraison/cashOut/list',
+      '/livres/list', '/livraison/cashout/list',
+    ],
+    cash_ready: [
+      '/livraison/cashOut/list', '/livraison/non/encaisse/list', '/cashout/list',
+    ],
+  };
+
+  async function fetchFallback() {
+    var out = {};
+    var statuses = Object.keys(FALLBACK_PATHS);
+    for (var si = 0; si < statuses.length; si++) {
+      var s = statuses[si];
+      if (!out[s]) out[s] = new Set();
+      var paths = FALLBACK_PATHS[s];
+      for (var pi = 0; pi < paths.length; pi++) {
+        try {
+          var r = await fetch('https://platform.dhd-dz.com' + paths[pi], {
+            method: 'POST', credentials: 'include',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-Requested-With': 'XMLHttpRequest',
+              Accept: 'application/json',
+            },
+            body: 'draw=1&start=0&length=10000',
+          });
+          if (!r.ok) continue;
+          var j = await r.json();
+          if (!j || !Array.isArray(j.data)) continue;
+          addTracking(s, JSON.stringify(j.data));
+        } catch (_) {}
+      }
+    }
+    return out;
+  }
+
+  // ── Main sync ────────────────────────────────────────────────────────────
+  var running = false;
+  async function syncNow() {
+    if (running) return;
+    running = true;
+    setBadge('🔄 جاري جمع البيانات...', '#1d4ed8');
+
+    // 1. Click tabs to trigger XHR interception
+    await clickAllTabs();
+
+    // 2. Also try direct fallback fetches
+    setBadge('🔄 جاري المزامنة...', '#1d4ed8');
+    await fetchFallback();
+
+    // 3. Merge liveData into final object
+    var merged = {};
+    var ALL = ['shipped', 'out_for_delivery', 'pending_delivery', 'delivered', 'cash_ready'];
+    var total = 0;
+    for (var i = 0; i < ALL.length; i++) {
+      var st = ALL[i];
+      merged[st] = liveData[st] ? Array.from(liveData[st]) : [];
+      total += merged[st].length;
+    }
+
+    if (total === 0) {
+      setBadge('⚠️ لا توجد طلبيات DHD', '#b45309');
+      running = false;
+      return;
+    }
+
+    // 4. POST to our API
+    try {
+      var rr = await fetch(TARGET, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statuses: merged }),
+      });
+      if (!rr.ok) {
+        if (rr.status === 401) setBadge('🔒 سجّل دخول الحاج لاز أولاً', '#b91c1c');
+        else setBadge('❌ فشل HTTP ' + rr.status, '#b91c1c');
+        running = false;
+        return;
+      }
+      var data = await rr.json();
+      var t = new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
+      setBadge('✓ ' + (data.updated || 0) + ' محدّثة • ' + t, '#15803d');
+    } catch (e) {
+      setBadge('❌ خطأ: ' + (e.message || ''), '#b91c1c');
+    } finally {
+      running = false;
+    }
+  }
+
+  badge.addEventListener('click', syncNow);
+  setTimeout(syncNow, 3000);
+  setInterval(syncNow, INTERVAL_MS);
+})();
+`;
+}
+
+router.get("/dhd-sync.user.js", (req, res) => {
+  const proto = (req.headers["x-forwarded-proto"] as string) || req.protocol || "https";
+  const host = (req.headers["x-forwarded-host"] as string) || req.get("host") || "";
+  const origin = `${proto}://${host}`;
+  res.setHeader("Content-Type", "text/javascript; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache");
+  res.send(buildUserScript(origin));
+});
+
 router.get("/admin/dhd/export", async (req, res) => {
   const session = (req as any).session;
   if (!session?.isAdmin) {
@@ -150,7 +395,6 @@ function extractTracking(data: DhdCreateResponse): string | null {
     if (typeof c === "string" && c.trim()) return c.trim();
     if (typeof c === "number") return String(c);
   }
-  // Sometimes API nests under data.data.tracking
   const nested = (data as Record<string, unknown>)?.["data"];
   if (nested && typeof nested === "object") {
     return extractTracking(nested as DhdCreateResponse);
@@ -275,7 +519,7 @@ router.post("/admin/dhd/upload-to-dhd", async (req, res) => {
   });
 });
 
-// ====== Sync statuses from DHD platform (via browser bookmarklet) ======
+// ====== Sync statuses from DHD platform (via UserScript/Bookmarklet) ======
 
 router.post("/admin/dhd/sync-statuses", async (req, res) => {
   const session = (req as { session?: { isAdmin?: boolean } }).session;
@@ -303,7 +547,6 @@ router.post("/admin/dhd/sync-statuses", async (req, res) => {
       ),
     ];
 
-  // Apply in priority order — last write wins. cash_ready overrides delivered.
   const order: { status: string; tracks: string[] }[] = [
     { status: "shipped", tracks: norm(buckets.shipped) },
     { status: "out_for_delivery", tracks: norm(buckets.out_for_delivery) },
@@ -312,7 +555,6 @@ router.post("/admin/dhd/sync-statuses", async (req, res) => {
     { status: "cash_ready", tracks: norm(buckets.cash_ready) },
   ];
 
-  // Track final status assignment per tracking number
   const finalAssignment = new Map<string, string>();
   for (const { status, tracks } of order) {
     for (const t of tracks) finalAssignment.set(t, status);
@@ -336,7 +578,6 @@ router.post("/admin/dhd/sync-statuses", async (req, res) => {
   );
   const unmatched = allTracks.filter((t) => !found.has(t));
 
-  // Group by target status to do bulk updates per status
   const groups = new Map<string, string[]>();
   for (const [track, status] of finalAssignment.entries()) {
     if (!found.has(track)) continue;

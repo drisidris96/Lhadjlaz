@@ -38,12 +38,14 @@ const STATUS_LABELS: Record<string, string> = {
 function buildUserscript(apiOrigin: string): string {
   return `// ==UserScript==
 // @name         Lhadj Laz - DHD Auto Sync
-// @namespace    ${apiOrigin}
-// @version      1.0
+// @namespace    ${apiOrigin}/
+// @version      2.1
 // @description  مزامنة تلقائية لحالات DHD مع لوحة إدارة الحاج لاز كل 5 دقائق
 // @match        https://platform.dhd-dz.com/*
 // @grant        none
 // @run-at       document-idle
+// @updateURL    ${apiOrigin}/api/dhd-sync.user.js
+// @downloadURL  ${apiOrigin}/api/dhd-sync.user.js
 // ==/UserScript==
 
 (function () {
@@ -53,85 +55,121 @@ function buildUserscript(apiOrigin: string): string {
 
   var TARGET = '${apiOrigin}/api/admin/dhd/sync-statuses';
   var INTERVAL_MS = 5 * 60 * 1000;
-  var T = {
-    shipped: ['/valid/orders/list'],
-    out_for_delivery: ['/livraisons/list', '/stopdesk/list'],
-    pending_delivery: ['/livraisons/suspendu/list'],
-    delivered: ['/livraison/non/encaisse/list', '/livraison/cashOut/list', '/livraison/cashin/list', '/livraison/cashin/history/list'],
-    cash_ready: ['/livraison/cashOut/list']
+
+  function detectStatus(url) {
+    var u = (url || '').toLowerCase();
+    if (/\\/cashin\\/list|\\/cashin\\/history/.test(u)) return 'delivered';
+    if (/non\\/encaisse/.test(u)) return 'cash_ready';
+    if (/cashout/.test(u)) return 'cash_ready';
+    if (/livr[ée]s?\\/list|\\/livres\\//.test(u)) return 'delivered';
+    if (/cashin/.test(u)) return 'delivered';
+    if (/suspendu|suspend/.test(u)) return 'pending_delivery';
+    if (/stopdesk|stop.desk/.test(u)) return 'out_for_delivery';
+    if (/livraison/.test(u)) return 'out_for_delivery';
+    if (/valid|pret|pr[eê]t|expedition|wilaya|station|order/.test(u)) return 'shipped';
+    return null;
+  }
+
+  var liveData = {};
+  var re = /DHD[A-Z0-9]{8,40}/g;
+  function addTracking(status, text) {
+    if (!status) return;
+    if (!liveData[status]) liveData[status] = new Set();
+    re.lastIndex = 0;
+    var m;
+    while ((m = re.exec(text)) !== null) liveData[status].add(m[0]);
+  }
+
+  var origOpen = XMLHttpRequest.prototype.open;
+  var origSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.open = function (method, url) {
+    this.__lhUrl = String(url || '');
+    this.__lhMethod = String(method || '');
+    return origOpen.apply(this, arguments);
+  };
+  XMLHttpRequest.prototype.send = function (body) {
+    var url = this.__lhUrl || '';
+    var method = this.__lhMethod || '';
+    if (method.toUpperCase() === 'POST' && url.indexOf('/list') !== -1 && typeof body === 'string' && body.indexOf('draw=') !== -1) {
+      var status = detectStatus(url);
+      var self = this;
+      var orig = this.onreadystatechange;
+      this.onreadystatechange = function () {
+        if (self.readyState === 4 && self.status === 200 && status) {
+          try { var d = JSON.parse(self.responseText); if (d && Array.isArray(d.data) && d.data.length > 0) addTracking(status, JSON.stringify(d.data)); } catch (_) {}
+        }
+        if (orig) orig.apply(self, arguments);
+      };
+    }
+    return origSend.apply(this, arguments);
   };
 
   var badge = document.createElement('div');
   badge.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:2147483647;background:rgba(0,0,0,.85);color:#fff;padding:8px 14px;border-radius:8px;font:13px/1.4 -apple-system,sans-serif;direction:rtl;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);user-select:none';
-  badge.textContent = 'مزامنة DHD: في الانتظار...';
+  badge.textContent = '⏳ DHD: في الانتظار...';
   badge.title = 'اضغط لمزامنة فورية';
-  function setBadge(text, color) {
-    badge.textContent = text;
-    badge.style.background = color || 'rgba(0,0,0,.85)';
-  }
-  function attach() {
-    if (document.body) document.body.appendChild(badge);
-    else setTimeout(attach, 500);
-  }
+  function attach() { if (document.body) document.body.appendChild(badge); else setTimeout(attach, 300); }
   attach();
+  function setBadge(text, color) { badge.textContent = text; badge.style.background = color || 'rgba(0,0,0,.85)'; }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function clickAllTabs() {
+    var sel = ['.nav-tabs a','.nav-pills a','ul.nav li a','a[href*="livraison"]','a[href*="valid"]','a[href*="livre"]','a[href*="suspendu"]','a[href*="retour"]','a[href*="station"]','a[href*="wilaya"]','a[href*="stopdesk"]','a[href*="cashin"]','a[href*="cashout"]','a[href*="ramassage"]','a[href*="preparation"]'].join(',');
+    var tabs = Array.from(document.querySelectorAll(sel));
+    var seen = new Set();
+    tabs = tabs.filter(function (t) { var h = t.getAttribute('href') || ''; if (seen.has(h)) return false; seen.add(h); return true; });
+    for (var i = 0; i < tabs.length && i < 15; i++) { try { tabs[i].click(); } catch (_) {} await sleep(1200); }
+    await sleep(1000);
+  }
+
+  var FALLBACK = {
+    shipped: ['/valid/orders/list','/valid/list','/pret/list','/expedition/list','/vers-station/list','/station/list','/wilaya/list','/en-ramassage/list','/preparation/list'],
+    out_for_delivery: ['/livraisons/list','/livraison/list','/stopdesk/list','/en-livraison/list','/en-cours/list'],
+    pending_delivery: ['/livraisons/suspendu/list','/suspendu/list','/suspendus/list'],
+    delivered: ['/livraison/cashin/list','/livraison/cashin/history/list','/livraison/non/encaisse/list','/livraison/cashOut/list','/livres/list'],
+    cash_ready: ['/livraison/cashOut/list','/livraison/non/encaisse/list','/cashout/list'],
+  };
+  async function fetchFallback() {
+    var sts = Object.keys(FALLBACK);
+    for (var si = 0; si < sts.length; si++) {
+      var s = sts[si]; var paths = FALLBACK[s];
+      for (var pi = 0; pi < paths.length; pi++) {
+        try {
+          var r = await fetch('https://platform.dhd-dz.com' + paths[pi], { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' }, body: 'draw=1&start=0&length=10000' });
+          if (!r.ok) continue;
+          var j = await r.json();
+          if (!j || !Array.isArray(j.data)) continue;
+          addTracking(s, JSON.stringify(j.data));
+        } catch (_) {}
+      }
+    }
+  }
 
   var running = false;
   async function syncNow() {
     if (running) return;
     running = true;
-    setBadge('🔄 جاري مزامنة DHD...', '#1d4ed8');
-    var out = {};
-    var errs = [];
-    for (var k of Object.keys(T)) {
-      var all = new Set();
-      for (var p of T[k]) {
-        try {
-          var r = await fetch('https://platform.dhd-dz.com' + p, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
-            body: 'draw=1&start=0&length=10000'
-          });
-          if (!r.ok) { errs.push(p + ' HTTP ' + r.status); continue; }
-          var j = await r.json();
-          var txt = JSON.stringify(j.data || []);
-          var m, re = /DHD[A-Z0-9]{12,}/g;
-          while ((m = re.exec(txt)) !== null) all.add(m[0]);
-        } catch (e) { errs.push(p + ' ' + e.message); }
-      }
-      out[k] = [...all];
-    }
-    var total = Object.values(out).reduce(function (s, a) { return s + a.length; }, 0);
-    if (total === 0) {
-      setBadge('⚠️ لا توجد طلبيات DHD' + (errs.length ? ' • ' + errs.length + ' خطأ' : ''), '#b45309');
-      running = false;
-      return;
-    }
+    setBadge('🔄 جاري جمع البيانات...', '#1d4ed8');
+    await clickAllTabs();
+    setBadge('🔄 جاري المزامنة...', '#1d4ed8');
+    await fetchFallback();
+    var ALL = ['shipped','out_for_delivery','pending_delivery','delivered','cash_ready'];
+    var merged = {};
+    var total = 0;
+    for (var i = 0; i < ALL.length; i++) { merged[ALL[i]] = liveData[ALL[i]] ? Array.from(liveData[ALL[i]]) : []; total += merged[ALL[i]].length; }
+    if (total === 0) { setBadge('⚠️ لا توجد طلبيات DHD', '#b45309'); running = false; return; }
     try {
-      var rr = await fetch(TARGET, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ statuses: out })
-      });
-      if (!rr.ok) {
-        if (rr.status === 401) setBadge('🔒 سجّل دخول الحاج لاز أولاً', '#b91c1c');
-        else setBadge('❌ فشلت المزامنة (HTTP ' + rr.status + ')', '#b91c1c');
-        running = false;
-        return;
-      }
+      var rr = await fetch(TARGET, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ statuses: merged }) });
+      if (!rr.ok) { if (rr.status === 401) setBadge('🔒 سجّل دخول الحاج لاز أولاً', '#b91c1c'); else setBadge('❌ HTTP ' + rr.status, '#b91c1c'); running = false; return; }
       var data = await rr.json();
       var t = new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
       setBadge('✓ ' + (data.updated || 0) + ' محدّثة • ' + t, '#15803d');
-    } catch (e) {
-      setBadge('❌ خطأ شبكة: ' + (e.message || e), '#b91c1c');
-    } finally {
-      running = false;
-    }
+    } catch (e) { setBadge('❌ خطأ: ' + (e.message || ''), '#b91c1c'); }
+    finally { running = false; }
   }
 
   badge.addEventListener('click', syncNow);
-  setTimeout(syncNow, 4000);
+  setTimeout(syncNow, 3000);
   setInterval(syncNow, INTERVAL_MS);
 })();
 `;
@@ -297,7 +335,7 @@ export default function AdminDhdSync() {
             </ol>
 
             <a
-              href={`${window.location.origin}/dhd-sync.user.js`}
+              href={`${window.location.origin}/api/dhd-sync.user.js`}
               className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-md shadow-md text-base"
               data-testid="link-install-userscript"
             >
