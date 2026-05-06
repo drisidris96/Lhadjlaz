@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Package, Truck, CheckCircle2, Clock, XCircle, ArrowRight, Loader2, MapPin, CalendarDays } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 
 const STATUS_INFO: Record<string, { label: string; icon: typeof Package; color: string; desc: string }> = {
   pending:          { label: "قيد الانتظار",     icon: Clock,        color: "text-gray-500",   desc: "تم استلام طلبيتك وهي قيد المراجعة" },
@@ -64,8 +64,12 @@ function dhdEventLabel(ev: DhdEvent): string {
 }
 
 export default function TrackOrder() {
-  const [orderId, setOrderId] = useState("");
-  const [searchId, setSearchId] = useState<number | null>(null);
+  const search = useSearch();
+  const urlId = new URLSearchParams(search).get("id");
+  const initialId = urlId && !isNaN(parseInt(urlId)) ? parseInt(urlId) : null;
+
+  const [orderId, setOrderId] = useState(initialId ? String(initialId) : "");
+  const [searchId, setSearchId] = useState<number | null>(initialId);
   const [dhdData, setDhdData] = useState<DhdTrackResult | null>(null);
   const [dhdLoading, setDhdLoading] = useState(false);
   const [dhdError, setDhdError] = useState<string | null>(null);
