@@ -198,6 +198,48 @@ router.post("/admin/dhd/import-tracking", async (req, res) => {
   res.json({ updated, notFound });
 });
 
+// ====== Public DHD tracking proxy (no admin auth needed) ======
+
+router.get("/orders/dhd-status/:trackingNumber", async (req, res) => {
+  const tn = String(req.params.trackingNumber).trim().toUpperCase();
+  if (!/^DHD[A-Z0-9]{4,}$/.test(tn)) {
+    res.status(400).json({ error: "رقم تتبع غير صالح" });
+    return;
+  }
+
+  const token = process.env.DHD_API_TOKEN;
+  if (!token) {
+    res.status(503).json({ error: "DHD not configured" });
+    return;
+  }
+
+  const endpoints = [
+    `${DHD_API_BASE}/parcel/${tn}`,
+    `${DHD_API_BASE}/tracking/${tn}`,
+    `${DHD_API_BASE}/colis/${tn}`,
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const resp = await fetch(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json",
+        },
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        res.json({ source: url, data });
+        return;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  res.status(404).json({ error: "لم يتم العثور على معلومات التتبع من DHD" });
+});
+
 // ====== Direct API upload to DHD/Ecotrack ======
 
 interface DhdCreateResponse {
