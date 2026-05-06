@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingBag, Search, Package, CheckCircle2, ArrowRight, X, Home, Building2, Truck } from "lucide-react";
+import { ShoppingBag, Search, Package, CheckCircle2, ArrowRight, X, Home, Building2, Phone, MapPin } from "lucide-react";
 import { Link } from "wouter";
-import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT, DHD_PRICES } from "@/lib/constants";
+import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT, DHD_PRICES, DHD_OFFICES } from "@/lib/constants";
 import type { Product } from "@workspace/api-client-react";
 
 type DeliveryType = "home" | "stop_desk";
@@ -16,8 +16,12 @@ type DeliveryType = "home" | "stop_desk";
 const INITIAL_FORM = {
   firstName: "", lastName: "", phone: "",
   wilaya: "", commune: "", address: "",
-  quantity: "1", deliveryType: "home" as DeliveryType,
+  quantity: "1", deliveryType: "" as DeliveryType | "",
 };
+
+const STOP_DESK_WILAYAS = ALGERIAN_WILAYAS.filter(
+  (w) => DHD_OFFICES[w] && DHD_PRICES[w] && DHD_PRICES[w].stopDesk > 0
+);
 
 export default function Store() {
   const { toast } = useToast();
@@ -30,13 +34,12 @@ export default function Store() {
 
   const { data: products, isLoading } = useListProducts({ category: category || undefined, search: search || undefined });
 
-  const dhdPrice = form.wilaya ? DHD_PRICES[form.wilaya] : null;
+  const dhdPrice = form.wilaya && form.deliveryType ? DHD_PRICES[form.wilaya] : null;
   const deliveryPrice = dhdPrice
     ? (form.deliveryType === "home" ? dhdPrice.home : dhdPrice.stopDesk)
     : null;
-  const stopDeskAvailable = dhdPrice ? dhdPrice.stopDesk > 0 : true;
-
-  const communes: string[] = form.wilaya ? (ALGERIAN_BALADIYAT[form.wilaya] ?? []) : [];
+  const office = form.deliveryType === "stop_desk" && form.wilaya ? DHD_OFFICES[form.wilaya] : null;
+  const communes: string[] = form.wilaya && form.deliveryType === "home" ? (ALGERIAN_BALADIYAT[form.wilaya] ?? []) : [];
 
   const createOrder = useCreateOrder({
     mutation: {
@@ -54,12 +57,16 @@ export default function Store() {
 
   const handleOrder = () => {
     if (!selectedProduct) return;
-    if (!form.firstName || !form.lastName || !form.phone || !form.wilaya || !form.commune || !form.address) {
+    if (!form.deliveryType) {
+      toast({ variant: "destructive", title: "الرجاء اختيار نوع التوصيل" });
+      return;
+    }
+    if (!form.firstName || !form.lastName || !form.phone || !form.wilaya) {
       toast({ variant: "destructive", title: "الرجاء تعبئة جميع الحقول" });
       return;
     }
-    if (form.deliveryType === "stop_desk" && !stopDeskAvailable) {
-      toast({ variant: "destructive", title: "التوصيل للمكتب غير متاح لهذه الولاية" });
+    if (form.deliveryType === "home" && (!form.commune || !form.address)) {
+      toast({ variant: "destructive", title: "الرجاء تعبئة البلدية والعنوان" });
       return;
     }
     const qty = parseInt(form.quantity);
@@ -68,7 +75,9 @@ export default function Store() {
       return;
     }
     const deliveryLabel = form.deliveryType === "home" ? "توصيل للمنزل" : "توصيل للمكتب (Stop Desk)";
-    const notes = deliveryLabel;
+    const address = form.deliveryType === "home"
+      ? `${form.commune} - ${form.address}`
+      : `Stop Desk - ${form.wilaya}`;
 
     createOrder.mutate({
       data: {
@@ -76,11 +85,11 @@ export default function Store() {
         lastName: form.lastName,
         phone: form.phone,
         wilaya: form.wilaya,
-        address: `${form.commune} - ${form.address}`,
+        address,
         productId: selectedProduct.id,
         quantity: qty,
         deliveryPrice: deliveryPrice ?? 0,
-        notes,
+        notes: deliveryLabel,
       },
     });
   };
@@ -155,132 +164,149 @@ export default function Store() {
               </button>
             </DialogTitle>
           </DialogHeader>
+
           <div className="space-y-4">
+            {/* Product price */}
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 flex justify-between items-center">
               <span className="text-sm text-muted-foreground">السعر للقطعة</span>
               <span className="font-bold text-xl text-primary">{selectedProduct && Number(selectedProduct.price).toLocaleString("ar-DZ")} د.ج</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { key: "firstName", label: "الاسم الأول", type: "text" },
-                { key: "lastName", label: "اسم العائلة", type: "text" },
-                { key: "phone", label: "رقم الهاتف", type: "tel" },
-                { key: "quantity", label: `الكمية (min: ${selectedProduct?.minOrderQty})`, type: "number" },
-              ].map(f => (
-                <div key={f.key} className="space-y-1">
-                  <Label className="text-xs">{f.label}</Label>
-                  <Input
-                    type={f.type}
-                    dir={f.type === "tel" ? "ltr" : "rtl"}
-                    value={(form as Record<string, string>)[f.key]}
-                    onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                    className="h-10"
-                    min={f.key === "quantity" ? selectedProduct?.minOrderQty : undefined}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Wilaya */}
-            <div className="space-y-1">
-              <Label className="text-xs">الولاية</Label>
-              <select
-                value={form.wilaya}
-                onChange={e => setForm(p => ({ ...p, wilaya: e.target.value, commune: "" }))}
-                className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background"
-              >
-                <option value="">اختر الولاية</option>
-                {(ALGERIAN_WILAYAS ?? []).map((w: string) => <option key={w} value={w}>{w}</option>)}
-              </select>
-            </div>
-
-            {/* Commune */}
-            {form.wilaya && communes.length > 0 && (
-              <div className="space-y-1">
-                <Label className="text-xs">البلدية</Label>
-                <select
-                  value={form.commune}
-                  onChange={e => setForm(p => ({ ...p, commune: e.target.value }))}
-                  className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background"
+            {/* STEP 1 — Delivery type */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">1. اختر نوع التوصيل</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setForm(p => ({ ...p, deliveryType: "home", wilaya: "", commune: "", address: "" }))}
+                  className={`border rounded-xl p-4 text-right transition-all space-y-1 ${form.deliveryType === "home" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
                 >
-                  <option value="">اختر البلدية</option>
-                  {communes.map((c: string) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            )}
+                  <div className="flex items-center gap-2">
+                    <Home className="w-5 h-5 text-primary" />
+                    <span className="text-sm font-bold">للمنزل</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">ولاية + بلدية + عنوان</p>
+                </button>
 
-            {/* Address */}
-            <div className="space-y-1">
-              <Label className="text-xs">العنوان التفصيلي</Label>
-              <Input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="الحي، الشارع..." className="h-10" />
+                <button
+                  type="button"
+                  onClick={() => setForm(p => ({ ...p, deliveryType: "stop_desk", wilaya: "", commune: "", address: "" }))}
+                  className={`border rounded-xl p-4 text-right transition-all space-y-1 ${form.deliveryType === "stop_desk" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-primary" />
+                    <span className="text-sm font-bold">Stop Desk</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">استلام من المكتب</p>
+                </button>
+              </div>
             </div>
 
-            {/* Delivery Type */}
-            {form.wilaya && (
-              <div className="space-y-2">
-                <Label className="text-xs flex items-center gap-1">
-                  <Truck className="w-3.5 h-3.5" /> نوع التوصيل
-                </Label>
-
-                {stopDeskAvailable ? (
-                  /* Both options available: show two cards */
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setForm(p => ({ ...p, deliveryType: "home" }))}
-                      className={`border rounded-xl p-3 text-right transition-all ${form.deliveryType === "home" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Home className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-semibold">توصيل للمنزل</span>
+            {/* Fields — shown only after delivery type selected */}
+            {form.deliveryType && (
+              <>
+                {/* Personal info */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">2. معلوماتك الشخصية</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { key: "firstName", label: "الاسم الأول", type: "text" },
+                      { key: "lastName", label: "اسم العائلة", type: "text" },
+                      { key: "phone", label: "رقم الهاتف", type: "tel" },
+                      { key: "quantity", label: `الكمية (min: ${selectedProduct?.minOrderQty})`, type: "number" },
+                    ].map(f => (
+                      <div key={f.key} className="space-y-1">
+                        <Label className="text-xs">{f.label}</Label>
+                        <Input
+                          type={f.type}
+                          dir={f.type === "tel" ? "ltr" : "rtl"}
+                          value={(form as Record<string, string>)[f.key]}
+                          onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
+                          className="h-10"
+                          min={f.key === "quantity" ? selectedProduct?.minOrderQty : undefined}
+                        />
                       </div>
-                      {dhdPrice && <p className="font-bold text-primary text-sm">{dhdPrice.home.toLocaleString("ar-DZ")} د.ج</p>}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setForm(p => ({ ...p, deliveryType: "stop_desk" }))}
-                      className={`border rounded-xl p-3 text-right transition-all ${form.deliveryType === "stop_desk" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Building2 className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-semibold">مكتب Stop Desk</span>
-                      </div>
-                      {dhdPrice && <p className="font-bold text-primary text-sm">{dhdPrice.stopDesk.toLocaleString("ar-DZ")} د.ج</p>}
-                    </button>
+                    ))}
                   </div>
-                ) : (
-                  /* Stop desk not available: show only home delivery prominently */
-                  <div className="space-y-2">
-                    <div className="border border-primary bg-primary/5 ring-1 ring-primary rounded-xl p-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Home className="w-4 h-4 text-primary" />
-                        <span className="text-sm font-semibold">توصيل للمنزل</span>
+                </div>
+
+                {/* STEP 3 — Wilaya */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">
+                    3. {form.deliveryType === "home" ? "الولاية والبلدية" : "اختر الولاية"}
+                  </Label>
+
+                  <select
+                    value={form.wilaya}
+                    onChange={e => setForm(p => ({ ...p, wilaya: e.target.value, commune: "" }))}
+                    className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background"
+                  >
+                    <option value="">اختر الولاية</option>
+                    {(form.deliveryType === "stop_desk" ? STOP_DESK_WILAYAS : ALGERIAN_WILAYAS).map((w: string) => {
+                      const price = DHD_PRICES[w];
+                      const priceVal = form.deliveryType === "home" ? price?.home : price?.stopDesk;
+                      return (
+                        <option key={w} value={w}>
+                          {w}{priceVal ? ` — ${priceVal} د.ج` : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
+
+                  {/* Commune — home only */}
+                  {form.deliveryType === "home" && form.wilaya && communes.length > 0 && (
+                    <select
+                      value={form.commune}
+                      onChange={e => setForm(p => ({ ...p, commune: e.target.value }))}
+                      className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background"
+                    >
+                      <option value="">اختر البلدية</option>
+                      {communes.map((c: string) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  )}
+
+                  {/* Address — home only */}
+                  {form.deliveryType === "home" && form.wilaya && (
+                    <Input
+                      value={form.address}
+                      onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
+                      placeholder="العنوان التفصيلي (الحي، الشارع...)"
+                      className="h-10"
+                    />
+                  )}
+
+                  {/* Office info — stop desk only */}
+                  {form.deliveryType === "stop_desk" && office && (
+                    <div className="border border-primary/30 bg-primary/5 rounded-xl p-4 space-y-3">
+                      <p className="text-xs font-bold text-primary uppercase tracking-wide">عنوان المكتب</p>
+                      <div className="flex gap-2 items-start">
+                        <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                        <p className="text-xs leading-relaxed text-foreground">{office.address}</p>
                       </div>
-                      {dhdPrice && <p className="font-bold text-primary text-base">{dhdPrice.home.toLocaleString("ar-DZ")} د.ج</p>}
+                      <div className="flex gap-2 items-center">
+                        <Phone className="w-4 h-4 text-primary flex-shrink-0" />
+                        <p className="text-xs font-mono text-foreground" dir="ltr">{office.phone}</p>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Building2 className="w-3 h-3" />
-                      التوصيل للمكتب (Stop Desk) غير متاح لهذه الولاية
-                    </p>
-                  </div>
-                )}
+                  )}
+                </div>
 
-                {/* Delivery price summary when stop desk available */}
-                {stopDeskAvailable && deliveryPrice !== null && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex justify-between items-center text-sm">
-                    <span className="text-amber-800">تكلفة التوصيل</span>
+                {/* Delivery price summary */}
+                {deliveryPrice !== null && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 flex justify-between items-center">
+                    <span className="text-sm text-amber-800">
+                      {form.deliveryType === "home" ? "تكلفة التوصيل للمنزل" : "تكلفة Stop Desk"}
+                    </span>
                     <span className="font-bold text-amber-900">{deliveryPrice.toLocaleString("ar-DZ")} د.ج</span>
                   </div>
                 )}
-              </div>
-            )}
 
-            <Button className="w-full h-12 gap-2 text-base font-bold" onClick={handleOrder} disabled={createOrder.isPending}>
-              <ShoppingBag className="w-5 h-5" />
-              {createOrder.isPending ? "جاري الإرسال..." : "أرسل الطلبية"}
-            </Button>
+                <Button className="w-full h-12 gap-2 text-base font-bold" onClick={handleOrder} disabled={createOrder.isPending}>
+                  <ShoppingBag className="w-5 h-5" />
+                  {createOrder.isPending ? "جاري الإرسال..." : "أرسل الطلبية"}
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -292,14 +318,12 @@ export default function Store() {
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
             <h2 className="text-2xl font-bold">تم استلام طلبيتك!</h2>
 
-            {/* Order number — prominent */}
             <div className="bg-primary/10 border border-primary/30 rounded-xl py-3 px-4">
               <p className="text-xs text-muted-foreground mb-1">رقم طلبيتك</p>
               <p className="text-3xl font-black text-primary">#{orderedId}</p>
               <p className="text-xs text-muted-foreground mt-1">احتفظ بهذا الرقم</p>
             </div>
 
-            {/* Tracking note */}
             <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-right space-y-1">
               <p className="text-sm font-semibold text-amber-900">📞 سنتصل بك قريباً لتأكيد الطلبية</p>
               <p className="text-xs text-amber-700">
