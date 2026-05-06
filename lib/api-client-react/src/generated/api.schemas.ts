@@ -200,6 +200,16 @@ export interface UploadToDhdResponse {
   items?: UploadToDhdResponseItemsItem[];
 }
 
+export interface OrderTrackResponse {
+  id: number;
+  status: string;
+  productName: string;
+  trackingNumber?: string;
+  createdAt: string;
+  wilaya?: string;
+  firstName?: string;
+}
+
 export interface StoreStats {
   totalProducts: number;
   totalOrders: number;
