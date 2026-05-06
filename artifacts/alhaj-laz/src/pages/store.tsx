@@ -86,8 +86,8 @@ export default function Store() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-64 bg-muted animate-pulse rounded-xl" />)}
+          <div className="grid grid-cols-3 gap-3">
+            {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-48 bg-muted animate-pulse rounded-xl" />)}
           </div>
         ) : (products ?? []).length === 0 ? (
           <div className="text-center py-20">
@@ -95,7 +95,7 @@ export default function Store() {
             <h3 className="text-lg font-medium">لا توجد منتجات</h3>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             {(products ?? []).map(product => (
               <Card key={product.id} className="overflow-hidden group cursor-pointer hover:shadow-lg transition-all" onClick={() => setSelectedProduct(product)}>
                 <div className="aspect-square bg-muted overflow-hidden">
@@ -107,13 +107,11 @@ export default function Store() {
                     </div>
                   )}
                 </div>
-                <CardContent className="p-3 space-y-2">
-                  <h3 className="font-semibold text-sm leading-tight line-clamp-2">{product.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-primary">{Number(product.price).toLocaleString("ar-DZ")} د.ج</span>
-                    {product.stock === 0 && <span className="text-xs text-red-500 font-medium">نفد</span>}
-                  </div>
+                <CardContent className="p-2 space-y-1">
+                  <h3 className="font-semibold text-xs leading-tight line-clamp-2">{product.name}</h3>
+                  <p className="font-bold text-primary text-xs">{Number(product.price).toLocaleString("ar-DZ")} د.ج</p>
                   <p className="text-xs text-muted-foreground">الحد الأدنى: {product.minOrderQty} قطعة</p>
+                  {product.stock === 0 && <p className="text-xs text-red-500 font-medium">نفد</p>}
                 </CardContent>
               </Card>
             ))}
