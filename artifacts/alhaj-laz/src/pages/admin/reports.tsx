@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { TrendingUp, ShoppingBag, DollarSign, MapPin, Download } from "lucide-react";
 import { formatDZD } from "@/lib/utils";
-import * as XLSX from "xlsx";
-
 const WILAYA_COLORS = ["#3b82f6","#8b5cf6","#10b981","#f59e0b","#ef4444","#06b6d4","#84cc16","#f97316"];
 
 export default function AdminReports() {
@@ -67,8 +65,11 @@ export default function AdminReports() {
     .map(([name, value]) => ({ name, value }));
 
   const handleExportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const wsData = [
+    const esc = (v: unknown) => {
+      const s = String(v ?? "").replace(/"/g, '""');
+      return /[",\n\r]/.test(s) ? `"${s}"` : s;
+    };
+    const rows = [
       ["#", "الاسم", "الهاتف", "الولاية", "المنتج", "الكمية", "المبلغ", "الحالة", "التاريخ"],
       ...allOrders.map(o => [
         o.id,
@@ -82,9 +83,14 @@ export default function AdminReports() {
         new Date(o.createdAt).toLocaleDateString("en-GB"),
       ]),
     ];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, "الطلبيات");
-    XLSX.writeFile(wb, `تقرير-الطلبيات-${new Date().toISOString().split("T")[0]}.xlsx`);
+    const csv = "\uFEFF" + rows.map(r => r.map(esc).join(",")).join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `تقرير-الطلبيات-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
