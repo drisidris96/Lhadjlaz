@@ -222,43 +222,53 @@ export default function Store() {
                 <Label className="text-xs flex items-center gap-1">
                   <Truck className="w-3.5 h-3.5" /> نوع التوصيل
                 </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {/* Home delivery */}
-                  <button
-                    type="button"
-                    onClick={() => setForm(p => ({ ...p, deliveryType: "home" }))}
-                    className={`border rounded-xl p-3 text-right transition-all ${form.deliveryType === "home" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Home className="w-4 h-4 text-primary" />
-                      <span className="text-xs font-semibold">توصيل للمنزل</span>
-                    </div>
-                    {dhdPrice && (
-                      <p className="font-bold text-primary text-sm">{dhdPrice.home.toLocaleString("ar-DZ")} د.ج</p>
-                    )}
-                  </button>
 
-                  {/* Stop desk */}
-                  <button
-                    type="button"
-                    onClick={() => stopDeskAvailable && setForm(p => ({ ...p, deliveryType: "stop_desk" }))}
-                    disabled={!stopDeskAvailable}
-                    className={`border rounded-xl p-3 text-right transition-all ${!stopDeskAvailable ? "border-muted bg-muted/30 opacity-50 cursor-not-allowed" : form.deliveryType === "stop_desk" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Building2 className="w-4 h-4 text-primary" />
-                      <span className="text-xs font-semibold">مكتب Stop Desk</span>
-                    </div>
-                    {dhdPrice && (
-                      <p className="font-bold text-primary text-sm">
-                        {stopDeskAvailable ? `${dhdPrice.stopDesk.toLocaleString("ar-DZ")} د.ج` : "غير متاح"}
-                      </p>
-                    )}
-                  </button>
-                </div>
+                {stopDeskAvailable ? (
+                  /* Both options available: show two cards */
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, deliveryType: "home" }))}
+                      className={`border rounded-xl p-3 text-right transition-all ${form.deliveryType === "home" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Home className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-semibold">توصيل للمنزل</span>
+                      </div>
+                      {dhdPrice && <p className="font-bold text-primary text-sm">{dhdPrice.home.toLocaleString("ar-DZ")} د.ج</p>}
+                    </button>
 
-                {/* Delivery price summary */}
-                {deliveryPrice !== null && (
+                    <button
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, deliveryType: "stop_desk" }))}
+                      className={`border rounded-xl p-3 text-right transition-all ${form.deliveryType === "stop_desk" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary/50"}`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Building2 className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-semibold">مكتب Stop Desk</span>
+                      </div>
+                      {dhdPrice && <p className="font-bold text-primary text-sm">{dhdPrice.stopDesk.toLocaleString("ar-DZ")} د.ج</p>}
+                    </button>
+                  </div>
+                ) : (
+                  /* Stop desk not available: show only home delivery prominently */
+                  <div className="space-y-2">
+                    <div className="border border-primary bg-primary/5 ring-1 ring-primary rounded-xl p-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Home className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-semibold">توصيل للمنزل</span>
+                      </div>
+                      {dhdPrice && <p className="font-bold text-primary text-base">{dhdPrice.home.toLocaleString("ar-DZ")} د.ج</p>}
+                    </div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Building2 className="w-3 h-3" />
+                      التوصيل للمكتب (Stop Desk) غير متاح لهذه الولاية
+                    </p>
+                  </div>
+                )}
+
+                {/* Delivery price summary when stop desk available */}
+                {stopDeskAvailable && deliveryPrice !== null && (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex justify-between items-center text-sm">
                     <span className="text-amber-800">تكلفة التوصيل</span>
                     <span className="font-bold text-amber-900">{deliveryPrice.toLocaleString("ar-DZ")} د.ج</span>
