@@ -28,6 +28,7 @@ import type {
   ImportTrackingResponse,
   ListProductsParams,
   Order,
+  OrderTrackResponse,
   Product,
   StoreStats,
   SyncDhdStatusesBody,
@@ -720,6 +721,93 @@ export const useCreateOrder = <
 > => {
   return useMutation(getCreateOrderMutationOptions(options));
 };
+
+/**
+ * @summary Track an order by ID (public, no auth)
+ */
+export const getTrackOrderUrl = (id: number) => {
+  return `/api/orders/track/${id}`;
+};
+
+export const trackOrder = async (
+  id: number,
+  options?: RequestInit,
+): Promise<OrderTrackResponse> => {
+  return customFetch<OrderTrackResponse>(getTrackOrderUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getTrackOrderQueryKey = (id: number) => {
+  return [`/api/orders/track/${id}`] as const;
+};
+
+export const getTrackOrderQueryOptions = <
+  TData = Awaited<ReturnType<typeof trackOrder>>,
+  TError = ErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof trackOrder>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getTrackOrderQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof trackOrder>>> = ({
+    signal,
+  }) => trackOrder(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof trackOrder>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type TrackOrderQueryResult = NonNullable<
+  Awaited<ReturnType<typeof trackOrder>>
+>;
+export type TrackOrderQueryError = ErrorType<void>;
+
+/**
+ * @summary Track an order by ID (public, no auth)
+ */
+
+export function useTrackOrder<
+  TData = Awaited<ReturnType<typeof trackOrder>>,
+  TError = ErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof trackOrder>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getTrackOrderQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Get an order by ID
