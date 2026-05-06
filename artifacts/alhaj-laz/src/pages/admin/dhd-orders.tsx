@@ -15,13 +15,15 @@ const STATUS_COLORS: Record<string, string> = {
   cash_ready: "bg-emerald-100 text-emerald-800",
 };
 
-const STATUS_ORDER = [
+const SHIPPED_STATUSES = [
   "shipped",
   "out_for_delivery",
   "pending_delivery",
   "delivered",
   "cash_ready",
-];
+] as const;
+
+const STATUS_ORDER = [...SHIPPED_STATUSES];
 
 export default function AdminDhdOrders() {
   const [, setLocation] = useLocation();
@@ -38,7 +40,9 @@ export default function AdminDhdOrders() {
     { query: { refetchInterval: 30000 } }
   );
 
-  const dhdOrders = (orders ?? []).filter((o) => !!o.trackingNumber);
+  const dhdOrders = (orders ?? []).filter((o) =>
+    (SHIPPED_STATUSES as readonly string[]).includes(o.status)
+  );
 
   const byStatus: Record<string, typeof dhdOrders> = {};
   for (const s of STATUS_ORDER) byStatus[s] = [];
