@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Package, ShoppingBag, LayoutDashboard, LogOut, ListChecks, Store, Truck, RefreshCw } from "lucide-react";
+import { Package, ShoppingBag, LayoutDashboard, LogOut, ListChecks, Store, Truck, RefreshCw, Banknote } from "lucide-react";
 import { useAdminLogout } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -69,6 +69,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <div className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors cursor-pointer ${location === "/admin/dhd-sync" ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}>
               <RefreshCw className="w-5 h-5" />
               <span>مزامنة DHD</span>
+            </div>
+          </Link>
+
+          <Link href="/admin/dhd-payments">
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors cursor-pointer ${location === "/admin/dhd-payments" ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}>
+              <Banknote className="w-5 h-5" />
+              <span>مدفوعات DHD</span>
             </div>
           </Link>
 
