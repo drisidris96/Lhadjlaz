@@ -67,6 +67,28 @@ router.post("/orders", async (req, res) => {
   res.status(201).json({ ...order, totalPrice: Number(order.totalPrice) });
 });
 
+router.get("/orders/track/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+  const [order] = await db.select().from(ordersTable).where(eq(ordersTable.id, id));
+  if (!order) {
+    res.status(404).json({ error: "Order not found" });
+    return;
+  }
+  res.json({
+    id: order.id,
+    status: order.status,
+    productName: order.productName,
+    trackingNumber: order.trackingNumber,
+    createdAt: order.createdAt,
+    wilaya: order.wilaya,
+    firstName: order.firstName,
+  });
+});
+
 router.get("/orders/:id", async (req, res) => {
   const session = (req as any).session;
   if (!session?.isAdmin) {
