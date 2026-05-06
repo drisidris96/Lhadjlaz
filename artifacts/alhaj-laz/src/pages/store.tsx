@@ -190,7 +190,7 @@ export default function Store() {
             <h2 className="text-2xl font-bold">تم استلام طلبيتك!</h2>
             <p className="text-muted-foreground">رقم طلبيتك هو <span className="font-bold text-foreground">#{orderedId}</span> — احتفظ به لتتبع طلبيتك</p>
             <div className="flex gap-2">
-              <Link href={`/track`} className="flex-1">
+              <Link href={`/track?id=${orderedId}`} className="flex-1">
                 <Button variant="outline" className="w-full gap-1" onClick={() => setOrdered(false)}>
                   تتبع الطلبية
                 </Button>
