@@ -27,13 +27,6 @@ import {
 import { formatDZD } from "@/lib/utils";
 
 const READY_TO_SHIP_STATUSES = ["confirmed"] as const;
-const SHIPPED_STATUSES = [
-  "shipped",
-  "out_for_delivery",
-  "pending_delivery",
-  "delivered",
-  "cash_ready",
-] as const;
 
 export default function AdminDhd() {
   const [, setLocation] = useLocation();
@@ -200,7 +193,7 @@ export default function AdminDhd() {
       !o.trackingNumber
   );
   const shippedOrders = allOrders.filter((o) =>
-    (SHIPPED_STATUSES as readonly string[]).includes(o.status)
+    ["shipped","out_for_delivery","pending_delivery","delivered","cash_ready"].includes(o.status)
   );
   const totalRevenuePending = readyToShip.reduce(
     (sum, o) => sum + (o.totalPrice || 0),
@@ -457,138 +450,6 @@ export default function AdminDhd() {
           </Card>
         </div>
 
-        {/* جدول الطلبيات المشحونة */}
-        <Card>
-          <CardHeader className="pb-4 border-b">
-            <CardTitle className="flex items-center gap-2">
-              <Truck className="w-5 h-5 text-indigo-600" />
-              الطلبيات المشحونة عبر DHD
-              <span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full mr-auto">
-                {shippedOrders.length}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {ordersLoading ? (
-              <div className="p-6 space-y-3">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-              </div>
-            ) : shippedOrders.length === 0 ? (
-              <div className="text-center py-12">
-                <Truck className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground">لا توجد طلبيات مشحونة بعد</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/50 border-b">
-                    <tr className="text-right">
-                      <th className="h-12 px-4 font-medium text-muted-foreground">
-                        رقم الطلب
-                      </th>
-                      <th className="h-12 px-4 font-medium text-muted-foreground">
-                        الزبون
-                      </th>
-                      <th className="h-12 px-4 font-medium text-muted-foreground">
-                        الهاتف
-                      </th>
-                      <th className="h-12 px-4 font-medium text-muted-foreground">
-                        الولاية
-                      </th>
-                      <th className="h-12 px-4 font-medium text-muted-foreground">
-                        المبلغ
-                      </th>
-                      <th className="h-12 px-4 font-medium text-muted-foreground">
-                        رقم التتبع
-                      </th>
-                      <th className="h-12 px-4 font-medium text-muted-foreground">
-                        الحالة
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {shippedOrders.map((order) => (
-                      <tr
-                        key={order.id}
-                        className="border-b hover:bg-muted/30 transition-colors"
-                      >
-                        <td className="p-4 font-mono text-xs">
-                          CMD-{order.id}
-                        </td>
-                        <td className="p-4">
-                          {order.firstName} {order.lastName}
-                        </td>
-                        <td className="p-4 font-mono text-xs" dir="ltr">
-                          {order.phone}
-                        </td>
-                        <td className="p-4">{order.wilaya || "—"}</td>
-                        <td className="p-4 font-bold">
-                          {formatDZD(order.totalPrice)}
-                        </td>
-                        <td className="p-4">
-                          {order.trackingNumber ? (
-                            <span
-                              className="font-mono text-xs bg-primary/10 text-primary px-2 py-1 rounded inline-block"
-                              dir="ltr"
-                            >
-                              {order.trackingNumber}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground/50 text-xs">
-                              —
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-4">
-                          {(() => {
-                            const map: Record<
-                              string,
-                              { cls: string; label: string }
-                            > = {
-                              shipped: {
-                                cls: "bg-indigo-100 text-indigo-800",
-                                label: "في انتظار الشحن",
-                              },
-                              out_for_delivery: {
-                                cls: "bg-purple-100 text-purple-800",
-                                label: "قيد التوصيل",
-                              },
-                              pending_delivery: {
-                                cls: "bg-orange-100 text-orange-800",
-                                label: "معلّق",
-                              },
-                              delivered: {
-                                cls: "bg-green-100 text-green-800",
-                                label: "تم التسليم",
-                              },
-                              cash_ready: {
-                                cls: "bg-emerald-100 text-emerald-800",
-                                label: "مسترجعة غير مدفوعة",
-                              },
-                            };
-                            const s = map[order.status] ?? {
-                              cls: "bg-gray-100 text-gray-800",
-                              label: order.status,
-                            };
-                            return (
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full font-medium ${s.cls}`}
-                              >
-                                {s.label}
-                              </span>
-                            );
-                          })()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </AdminLayout>
   );
