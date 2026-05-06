@@ -3,7 +3,7 @@ import { useTrackOrder } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Package, Truck, CheckCircle2, Clock, XCircle, ArrowRight } from "lucide-react";
+import { Search, Package, Truck, CheckCircle2, Clock, XCircle, ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 
 const STATUS_INFO: Record<string, { label: string; icon: typeof Package; color: string; desc: string }> = {
@@ -120,9 +120,18 @@ export default function TrackOrder() {
                     <p className="font-medium">{data.wilaya ?? "—"}</p>
                   </div>
                   {data.trackingNumber && (
-                    <div className="col-span-2 bg-primary/5 border border-primary/20 rounded-lg p-3">
-                      <p className="text-xs text-muted-foreground mb-1">رقم التتبع DHD</p>
+                    <div className="col-span-2 bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-2">
+                      <p className="text-xs text-muted-foreground">رقم التتبع DHD</p>
                       <p className="font-mono font-bold text-primary" dir="ltr">{data.trackingNumber}</p>
+                      <a
+                        href={`https://dhd-dz.com/`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-primary underline underline-offset-2 hover:opacity-80"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        تتبع طردك مباشرةً على موقع DHD
+                      </a>
                     </div>
                   )}
                   <div className="col-span-2 bg-muted/40 rounded-lg p-3">
