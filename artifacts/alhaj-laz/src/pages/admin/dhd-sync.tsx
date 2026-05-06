@@ -278,13 +278,13 @@ export default function AdminDhdSync() {
 
             <ol className="list-decimal pr-5 space-y-2">
               <li>
-                ثبّت إضافة <strong>Tampermonkey</strong> في Kiwi Browser من
+                ثبّت إضافة <strong>Violentmonkey</strong> في Kiwi Browser من
                 متجر Chrome.
               </li>
               <li>
                 اضغط الزر الأخضر بالأسفل: <strong>"تثبيت السكربت بنقرة
-                واحدة"</strong> — سيفتح Tampermonkey صفحة التثبيت تلقائياً،
-                اضغط <strong>Install</strong>.
+                واحدة"</strong> — سيفتح Violentmonkey صفحة التثبيت تلقائياً،
+                اضغط <strong>Confirm installation</strong>.
               </li>
               <li>
                 افتح <code className="bg-muted px-1 rounded">platform.dhd-dz.com</code> وسجّل
@@ -311,10 +311,10 @@ export default function AdminDhdSync() {
               </summary>
               <div className="mt-3 space-y-3">
                 <div className="bg-amber-50 border border-amber-200 rounded p-3 text-amber-900">
-                  <strong>مهم:</strong> عند فتح Tampermonkey →{" "}
-                  <strong>Create a new script</strong>، يظهر قالب افتراضي.
+                  <strong>مهم:</strong> عند فتح Violentmonkey →{" "}
+                  <strong>New script</strong>، يظهر قالب افتراضي.
                   <strong> احذف كل محتوى المحرر أولاً</strong> ثم الصق الكود
-                  أدناه، وإلا ستظهر رسالة "Invalid Userscript".
+                  أدناه، وإلا ستظهر رسالة خطأ.
                 </div>
                 <div className="bg-muted rounded-md p-3">
                   <textarea
