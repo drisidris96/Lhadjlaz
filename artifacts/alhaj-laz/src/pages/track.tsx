@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTrackOrder } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Package, Truck, CheckCircle2, Clock, XCircle, ArrowRight, ExternalLink } from "lucide-react";
+import { Search, Package, Truck, CheckCircle2, Clock, XCircle, ArrowRight, Loader2, MapPin, CalendarDays } from "lucide-react";
 import { Link } from "wouter";
 
 const STATUS_INFO: Record<string, { label: string; icon: typeof Package; color: string; desc: string }> = {
@@ -19,14 +19,83 @@ const STATUS_INFO: Record<string, { label: string; icon: typeof Package; color: 
 
 const STATUS_STEPS = ["pending","confirmed","shipped","out_for_delivery","delivered"];
 
+interface DhdEvent {
+  date?: string;
+  datetime?: string;
+  created_at?: string;
+  status?: string;
+  statut?: string;
+  description?: string;
+  message?: string;
+  lieu?: string;
+  location?: string;
+  [key: string]: unknown;
+}
+
+interface DhdTrackResult {
+  status?: string;
+  statut?: string;
+  etat?: string;
+  historique?: DhdEvent[];
+  history?: DhdEvent[];
+  events?: DhdEvent[];
+  tracking_history?: DhdEvent[];
+  [key: string]: unknown;
+}
+
+function normalizeDhdHistory(data: DhdTrackResult): DhdEvent[] {
+  const arr = data.historique ?? data.history ?? data.events ?? data.tracking_history;
+  if (Array.isArray(arr)) return arr;
+  return [];
+}
+
+function formatDhdDate(ev: DhdEvent): string {
+  const raw = ev.date ?? ev.datetime ?? ev.created_at ?? "";
+  if (!raw) return "";
+  try {
+    return new Date(String(raw)).toLocaleString("fr-DZ");
+  } catch {
+    return String(raw);
+  }
+}
+
+function dhdEventLabel(ev: DhdEvent): string {
+  return String(ev.status ?? ev.statut ?? ev.description ?? ev.message ?? "").trim();
+}
+
 export default function TrackOrder() {
   const [orderId, setOrderId] = useState("");
   const [searchId, setSearchId] = useState<number | null>(null);
+  const [dhdData, setDhdData] = useState<DhdTrackResult | null>(null);
+  const [dhdLoading, setDhdLoading] = useState(false);
+  const [dhdError, setDhdError] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useTrackOrder(
     searchId ?? 0,
     { query: { enabled: searchId !== null } }
   );
+
+  useEffect(() => {
+    if (!data?.trackingNumber) {
+      setDhdData(null);
+      setDhdError(null);
+      return;
+    }
+    setDhdData(null);
+    setDhdError(null);
+    setDhdLoading(true);
+    fetch(`/api/orders/dhd-status/${encodeURIComponent(data.trackingNumber)}`)
+      .then(r => r.json())
+      .then(json => {
+        if (json?.data) {
+          setDhdData(json.data as DhdTrackResult);
+        } else if (json?.error) {
+          setDhdError(json.error as string);
+        }
+      })
+      .catch(() => setDhdError("تعذّر الاتصال بـ DHD"))
+      .finally(() => setDhdLoading(false));
+  }, [data?.trackingNumber]);
 
   const handleSearch = () => {
     const id = parseInt(orderId.trim());
@@ -36,6 +105,10 @@ export default function TrackOrder() {
   const info = data ? STATUS_INFO[data.status] : null;
   const StatusIcon = info?.icon ?? Package;
   const currentStep = data ? STATUS_STEPS.indexOf(data.status) : -1;
+  const dhdHistory = dhdData ? normalizeDhdHistory(dhdData) : [];
+  const dhdCurrentStatus = dhdData
+    ? String(dhdData.status ?? dhdData.statut ?? dhdData.etat ?? "").trim()
+    : "";
 
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col" dir="rtl">
@@ -59,7 +132,7 @@ export default function TrackOrder() {
               <Truck className="w-8 h-8 text-primary" />
             </div>
             <h1 className="text-3xl font-black">تتبع طلبيتك</h1>
-            <p className="text-muted-foreground mt-2">أدخل رقم طلبيتك لمعرفة حالتها</p>
+            <p className="text-muted-foreground mt-2">أدخل رقم طلبيتك لمعرفة حالتها لحظةً بلحظة</p>
           </div>
 
           <div className="flex gap-2">
@@ -73,7 +146,7 @@ export default function TrackOrder() {
               dir="ltr"
             />
             <Button onClick={handleSearch} disabled={isLoading} className="h-12 px-6 gap-2">
-              <Search className="w-4 h-4" />
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               بحث
             </Button>
           </div>
@@ -119,21 +192,6 @@ export default function TrackOrder() {
                     <p className="text-xs text-muted-foreground mb-1">الولاية</p>
                     <p className="font-medium">{data.wilaya ?? "—"}</p>
                   </div>
-                  {data.trackingNumber && (
-                    <div className="col-span-2 bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-2">
-                      <p className="text-xs text-muted-foreground">رقم التتبع DHD</p>
-                      <p className="font-mono font-bold text-primary" dir="ltr">{data.trackingNumber}</p>
-                      <a
-                        href={`https://dhd-dz.com/`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-primary underline underline-offset-2 hover:opacity-80"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        تتبع طردك مباشرةً على موقع DHD
-                      </a>
-                    </div>
-                  )}
                   <div className="col-span-2 bg-muted/40 rounded-lg p-3">
                     <p className="text-xs text-muted-foreground mb-1">تاريخ الطلبية</p>
                     <p className="font-medium" dir="ltr">{new Date(data.createdAt).toLocaleDateString("en-GB")}</p>
@@ -159,6 +217,69 @@ export default function TrackOrder() {
                         );
                       })}
                     </div>
+                  </div>
+                )}
+
+                {data.trackingNumber && (
+                  <div className="border rounded-xl overflow-hidden">
+                    <div className="bg-primary/5 border-b px-4 py-3 flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-muted-foreground">رقم التتبع DHD</p>
+                        <p className="font-mono font-bold text-primary text-sm" dir="ltr">{data.trackingNumber}</p>
+                      </div>
+                      {dhdLoading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                      {dhdCurrentStatus && !dhdLoading && (
+                        <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-1 rounded-full">
+                          {dhdCurrentStatus}
+                        </span>
+                      )}
+                    </div>
+
+                    {dhdLoading && (
+                      <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                        جاري جلب آخر تحديثات التوصيل من DHD...
+                      </div>
+                    )}
+
+                    {!dhdLoading && dhdError && (
+                      <div className="px-4 py-4 text-center text-sm text-muted-foreground">
+                        {dhdError}
+                      </div>
+                    )}
+
+                    {!dhdLoading && dhdHistory.length > 0 && (
+                      <div className="px-4 py-4 space-y-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">سجل التوصيل</p>
+                        <ol className="relative border-r border-muted pr-5 space-y-4">
+                          {dhdHistory.map((ev, i) => (
+                            <li key={i} className="relative">
+                              <span className="absolute -right-[1.35rem] top-1 w-3 h-3 rounded-full bg-primary/20 border-2 border-primary/60 block" />
+                              <p className="text-sm font-medium leading-tight">{dhdEventLabel(ev) || "تحديث"}</p>
+                              <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                                {(ev.lieu ?? ev.location) && (
+                                  <span className="flex items-center gap-0.5">
+                                    <MapPin className="w-3 h-3" />
+                                    {String(ev.lieu ?? ev.location)}
+                                  </span>
+                                )}
+                                {formatDhdDate(ev) && (
+                                  <span className="flex items-center gap-0.5" dir="ltr">
+                                    <CalendarDays className="w-3 h-3" />
+                                    {formatDhdDate(ev)}
+                                  </span>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+
+                    {!dhdLoading && !dhdError && dhdHistory.length === 0 && dhdData && (
+                      <div className="px-4 py-4 text-center text-sm text-muted-foreground">
+                        لا يوجد سجل تفصيلي بعد — تحقق لاحقاً
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
