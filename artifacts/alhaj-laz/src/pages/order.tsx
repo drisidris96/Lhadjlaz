@@ -21,6 +21,7 @@ const INITIAL_FORM = {
   firstName: "", lastName: "", phone: "",
   wilaya: "", commune: "", address: "",
   quantity: "", deliveryType: "" as DeliveryType | "",
+  size: "",
 };
 
 export default function OrderPage() {
@@ -73,7 +74,10 @@ export default function OrderPage() {
     const address = form.deliveryType === "home"
       ? `${form.commune} - ${form.address}`
       : `Stop Desk - ${form.wilaya}`;
-    const notes = form.deliveryType === "home" ? "توصيل للمنزل" : "توصيل للمكتب (Stop Desk)";
+    const notes = [
+      form.deliveryType === "home" ? "توصيل للمنزل" : "توصيل للمكتب (Stop Desk)",
+      form.size ? `المقاس: ${form.size}` : "",
+    ].filter(Boolean).join(" | ");
 
     createOrder.mutate({
       data: {
@@ -226,6 +230,15 @@ export default function OrderPage() {
                           min={product?.minOrderQty ?? 1}
                           value={form.quantity}
                           onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))}
+                          className="h-10"
+                        />
+                      </div>
+                      <div className="space-y-1 col-span-2">
+                        <Label className="text-xs">المقاس <span className="text-muted-foreground">(اختياري)</span></Label>
+                        <Input
+                          value={form.size}
+                          onChange={e => setForm(p => ({ ...p, size: e.target.value }))}
+                          placeholder="مثال: XL، 42، M ..."
                           className="h-10"
                         />
                       </div>

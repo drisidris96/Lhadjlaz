@@ -17,6 +17,7 @@ const INITIAL_FORM = {
   firstName: "", lastName: "", phone: "",
   wilaya: "", commune: "", address: "",
   quantity: "1", deliveryType: "" as DeliveryType | "",
+  size: "",
 };
 
 const STOP_DESK_WILAYAS = ALGERIAN_WILAYAS.filter(
@@ -74,7 +75,10 @@ export default function Store() {
       toast({ variant: "destructive", title: `الحد الأدنى للطلب ${selectedProduct.minOrderQty} قطعة` });
       return;
     }
-    const deliveryLabel = form.deliveryType === "home" ? "توصيل للمنزل" : "توصيل للمكتب (Stop Desk)";
+    const deliveryLabel = [
+      form.deliveryType === "home" ? "توصيل للمنزل" : "توصيل للمكتب (Stop Desk)",
+      form.size ? `المقاس: ${form.size}` : "",
+    ].filter(Boolean).join(" | ");
     const address = form.deliveryType === "home"
       ? `${form.commune} - ${form.address}`
       : `Stop Desk - ${form.wilaya}`;
@@ -227,6 +231,15 @@ export default function Store() {
                         />
                       </div>
                     ))}
+                    <div className="col-span-2 space-y-1">
+                      <Label className="text-xs">المقاس <span className="text-muted-foreground">(اختياري)</span></Label>
+                      <Input
+                        value={form.size}
+                        onChange={e => setForm(p => ({ ...p, size: e.target.value }))}
+                        placeholder="مثال: XL، 42، M ..."
+                        className="h-10"
+                      />
+                    </div>
                   </div>
                 </div>
 
