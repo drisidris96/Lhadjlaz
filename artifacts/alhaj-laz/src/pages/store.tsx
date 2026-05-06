@@ -188,7 +188,10 @@ export default function Store() {
           <div className="py-4 space-y-4">
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
             <h2 className="text-2xl font-bold">تم استلام طلبيتك!</h2>
-            <p className="text-muted-foreground">رقم طلبيتك هو <span className="font-bold text-foreground">#{orderedId}</span> — احتفظ به لتتبع طلبيتك</p>
+            <p className="text-muted-foreground">رقم طلبيتك هو <span className="font-bold text-foreground text-lg">#{orderedId}</span></p>
+            <p className="text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-3 py-2">
+              📞 سنتصل بك قريباً لتأكيد الطلبية، ثم يمكنك تتبعها بهذا الرقم
+            </p>
             <div className="flex gap-2">
               <Link href={`/track?id=${orderedId}`} className="flex-1">
                 <Button variant="outline" className="w-full gap-1" onClick={() => setOrdered(false)}>
