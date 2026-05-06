@@ -16,6 +16,7 @@ import AdminOrdersList from "@/pages/admin/orders-list";
 import AdminDhd from "@/pages/admin/dhd";
 import AdminDhdSync from "@/pages/admin/dhd-sync";
 import AdminDhdPayments from "@/pages/admin/dhd-payments";
+import AdminDhdOrders from "@/pages/admin/dhd-orders";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/admin/dhd" component={AdminDhd} />
       <Route path="/admin/dhd-sync" component={AdminDhdSync} />
       <Route path="/admin/dhd-payments" component={AdminDhdPayments} />
+      <Route path="/admin/dhd-orders" component={AdminDhdOrders} />
       <Route component={NotFound} />
     </Switch>
   );
