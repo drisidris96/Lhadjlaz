@@ -29,16 +29,14 @@ export default function AdminDhdOrders() {
   const [, setLocation] = useLocation();
 
   const { data: session, isLoading: sessionLoading } = useAdminMe();
+  const { data: orders, isLoading, dataUpdatedAt } = useListOrders({
+    query: { refetchInterval: 30000 },
+  });
 
   if (!sessionLoading && !session?.isAdmin) {
     setLocation("/admin/login");
     return null;
   }
-
-  const { data: orders, isLoading, dataUpdatedAt } = useListOrders(
-    {},
-    { query: { refetchInterval: 30000 } }
-  );
 
   const dhdOrders = (orders ?? []).filter((o) =>
     (SHIPPED_STATUSES as readonly string[]).includes(o.status)
