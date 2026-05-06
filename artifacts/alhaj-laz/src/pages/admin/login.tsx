@@ -65,6 +65,9 @@ export default function AdminLogin() {
           </div>
           <h1 className="text-3xl font-black text-foreground">الحاج لاز</h1>
           <p className="text-muted-foreground mt-2">نظام إدارة المتجر</p>
+          <span className="inline-block mt-3 px-4 py-1.5 bg-primary/10 text-primary font-bold rounded-full text-sm tracking-wide">
+            لوحة الإدارة
+          </span>
         </div>
 
         <Card className="border-border/50 shadow-xl">
