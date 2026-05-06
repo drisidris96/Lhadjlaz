@@ -3,7 +3,7 @@ import { useTrackOrder } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Package, Truck, CheckCircle2, Clock, XCircle, ArrowRight, Loader2, MapPin, CalendarDays } from "lucide-react";
+import { Search, Package, Truck, CheckCircle2, Clock, XCircle, ArrowRight, Loader2, MapPin, CalendarDays, Hourglass } from "lucide-react";
 import { Link, useSearch } from "wouter";
 
 const STATUS_INFO: Record<string, { label: string; icon: typeof Package; color: string; desc: string }> = {
@@ -197,6 +197,19 @@ export default function TrackOrder() {
               </CardHeader>
               <CardContent className="pt-5 space-y-5">
                 <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">{info.desc}</p>
+
+                {/* Pending — waiting for confirmation notice */}
+                {data.status === "pending" && (
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 flex gap-3 items-start">
+                    <Hourglass className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 animate-pulse" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-amber-900">في انتظار التأكيد</p>
+                      <p className="text-xs text-amber-700 leading-relaxed">
+                        طلبيتك وصلتنا ✓ — انتظر حتى نتصل بك لتأكيدها ونرفعها على منصة التوصيل DHD، بعدها ستجد هنا تفاصيل الشحن والتتبع.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {!DONE_STATUSES.includes(data.status) && (
                   <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
