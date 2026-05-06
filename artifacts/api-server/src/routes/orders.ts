@@ -47,7 +47,7 @@ router.post("/orders", async (req, res) => {
     });
     return;
   }
-  const totalPrice = Number(product.price) * parsed.data.quantity;
+  const totalPrice = Number(product.price) * parsed.data.quantity + (parsed.data.deliveryPrice ?? 0);
   const [order] = await db
     .insert(ordersTable)
     .values({

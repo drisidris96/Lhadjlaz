@@ -79,6 +79,8 @@ export interface CreateOrderBody {
   wilaya?: string;
   productId: number;
   quantity: number;
+  /** Delivery cost in DZD (DHD tariff from Mascara) */
+  deliveryPrice?: number;
   notes?: string;
 }
 

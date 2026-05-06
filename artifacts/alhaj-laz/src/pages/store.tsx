@@ -68,8 +68,7 @@ export default function Store() {
       return;
     }
     const deliveryLabel = form.deliveryType === "home" ? "توصيل للمنزل" : "توصيل للمكتب (Stop Desk)";
-    const priceNote = deliveryPrice ? ` - ${deliveryPrice} د.ج` : "";
-    const notes = `${deliveryLabel}${priceNote}`;
+    const notes = deliveryLabel;
 
     createOrder.mutate({
       data: {
@@ -80,6 +79,7 @@ export default function Store() {
         address: `${form.commune} - ${form.address}`,
         productId: selectedProduct.id,
         quantity: qty,
+        deliveryPrice: deliveryPrice ?? 0,
         notes,
       },
     });
