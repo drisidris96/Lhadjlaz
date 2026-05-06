@@ -72,6 +72,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
 
+          <Link href="/admin/dhd-orders">
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors cursor-pointer ${location === "/admin/dhd-orders" ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}>
+              <Truck className="w-5 h-5" />
+              <span>طلبيات DHD</span>
+            </div>
+          </Link>
+
           <Link href="/admin/dhd-payments">
             <div className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors cursor-pointer ${location === "/admin/dhd-payments" ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}>
               <Banknote className="w-5 h-5" />
