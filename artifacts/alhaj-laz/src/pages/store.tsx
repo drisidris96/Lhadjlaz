@@ -291,10 +291,22 @@ export default function Store() {
           <div className="py-4 space-y-4">
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
             <h2 className="text-2xl font-bold">تم استلام طلبيتك!</h2>
-            <p className="text-muted-foreground">رقم طلبيتك هو <span className="font-bold text-foreground text-lg">#{orderedId}</span></p>
-            <p className="text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-3 py-2">
-              📞 سنتصل بك قريباً لتأكيد الطلبية، ثم يمكنك تتبعها بهذا الرقم
-            </p>
+
+            {/* Order number — prominent */}
+            <div className="bg-primary/10 border border-primary/30 rounded-xl py-3 px-4">
+              <p className="text-xs text-muted-foreground mb-1">رقم طلبيتك</p>
+              <p className="text-3xl font-black text-primary">#{orderedId}</p>
+              <p className="text-xs text-muted-foreground mt-1">احتفظ بهذا الرقم</p>
+            </div>
+
+            {/* Tracking note */}
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-right space-y-1">
+              <p className="text-sm font-semibold text-amber-900">📞 سنتصل بك قريباً لتأكيد الطلبية</p>
+              <p className="text-xs text-amber-700">
+                بعد التأكيد يمكنك تتبع طلبيتك برقم <span className="font-bold">#{orderedId}</span> من صفحة التتبع
+              </p>
+            </div>
+
             <div className="flex gap-2">
               <Link href={`/track?id=${orderedId}`} className="flex-1">
                 <Button variant="outline" className="w-full gap-1" onClick={() => setOrdered(false)}>
