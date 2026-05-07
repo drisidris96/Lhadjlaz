@@ -59,10 +59,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <div
                   className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
                   style={{
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "transparent",
                     color: "#ca8a04",
-                    border: active ? "2px solid #ca8a04" : "1px solid #fde68a",
-                    boxShadow: active ? "0 2px 8px rgba(202,138,4,0.35)" : "0 1px 3px rgba(0,0,0,0.08)",
+                    border: active ? "1px solid #ffffff" : "1px solid rgba(255,255,255,0.6)",
                     fontWeight: 600,
                   }}
                 >
@@ -70,9 +69,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   <span className="flex-1">{label}</span>
                   <span
                     style={{
-                      width: 22, height: 22, borderRadius: 6,
+                      width: 10, height: 10, borderRadius: "50%",
                       background: "linear-gradient(135deg,#fde047,#facc15)",
-                      boxShadow: "0 0 6px rgba(250,204,21,0.7)",
+                      boxShadow: "0 0 4px rgba(250,204,21,0.8)",
                       display: "inline-block",
                       flexShrink: 0,
                     }}
@@ -91,10 +90,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <div
                   className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
                   style={{
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "transparent",
                     color: "#ca8a04",
-                    border: "1px solid #fde68a",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                    border: "1px solid rgba(255,255,255,0.6)",
                     fontWeight: 600,
                   }}
                 >
@@ -102,9 +100,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   <span className="flex-1">{label}</span>
                   <span
                     style={{
-                      width: 22, height: 22, borderRadius: 6,
+                      width: 10, height: 10, borderRadius: "50%",
                       background: "linear-gradient(135deg,#fde047,#facc15)",
-                      boxShadow: "0 0 6px rgba(250,204,21,0.7)",
+                      boxShadow: "0 0 4px rgba(250,204,21,0.8)",
                       display: "inline-block",
                       flexShrink: 0,
                     }}
