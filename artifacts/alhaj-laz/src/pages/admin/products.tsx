@@ -29,7 +29,7 @@ import type { Product } from "@workspace/api-client-react/generated";
 import { useUpload } from "@workspace/object-storage-web";
 import { useRef } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PRODUCT_CATEGORIES } from "@/lib/constants";
+import { useListCategories } from "@workspace/api-client-react";
 
 const productSchema = z.object({
   name: z.string().min(2, "اسم المنتج مطلوب"),
@@ -63,6 +63,7 @@ export default function AdminProducts() {
   const { data: products, isLoading: productsLoading } = useListProducts({
     search: debouncedSearch
   });
+  const { data: categoriesData = [] } = useListCategories();
 
   const createProduct = useCreateProduct({
     mutation: {
@@ -235,8 +236,8 @@ export default function AdminProducts() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {PRODUCT_CATEGORIES.map(cat => (
-                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                              {categoriesData.map(cat => (
+                                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -397,8 +398,8 @@ export default function AdminProducts() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {PRODUCT_CATEGORIES.map(cat => (
-                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            {categoriesData.map(cat => (
+                              <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>

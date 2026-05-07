@@ -22,6 +22,7 @@ import AdminDhdOrders from "@/pages/admin/dhd-orders";
 import AdminReports from "@/pages/admin/reports";
 import AdminCustomers from "@/pages/admin/customers";
 import AdminInventory from "@/pages/admin/inventory";
+import AdminCategories from "@/pages/admin/categories";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/admin/reports" component={AdminReports} />
       <Route path="/admin/customers" component={AdminCustomers} />
       <Route path="/admin/inventory" component={AdminInventory} />
+      <Route path="/admin/categories" component={AdminCategories} />
       <Route path="/admin/dhd" component={AdminDhd} />
       <Route path="/admin/dhd-sync" component={AdminDhdSync} />
       <Route path="/admin/dhd-payments" component={AdminDhdPayments} />

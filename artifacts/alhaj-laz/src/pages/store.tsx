@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useListProducts, useCreateOrder } from "@workspace/api-client-react";
+import { useListProducts, useCreateOrder, useListCategories } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -11,7 +11,7 @@ import {
   ArrowRight, LayoutGrid, PackageSearch, Lock,
 } from "lucide-react";
 import { Link } from "wouter";
-import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT, DHD_PRICES, DHD_OFFICES, PRODUCT_CATEGORIES } from "@/lib/constants";
+import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT, DHD_PRICES, DHD_OFFICES } from "@/lib/constants";
 import type { Product } from "@workspace/api-client-react";
 
 type DeliveryType = "home" | "stop_desk";
@@ -37,6 +37,8 @@ export default function Store() {
   const [form, setForm] = useState(INITIAL_FORM);
 
   const { data: products, isLoading } = useListProducts({ category: category || undefined, search: search || undefined });
+  const { data: categoriesData = [] } = useListCategories();
+  const categories = categoriesData.map(c => c.name);
 
   const dhdPrice = form.wilaya && form.deliveryType ? DHD_PRICES[form.wilaya] : null;
   const deliveryPrice = dhdPrice
@@ -44,8 +46,6 @@ export default function Store() {
     : null;
   const office = form.deliveryType === "stop_desk" && form.wilaya ? DHD_OFFICES[form.wilaya] : null;
   const communes: string[] = form.wilaya && form.deliveryType === "home" ? (ALGERIAN_BALADIYAT[form.wilaya] ?? []) : [];
-  const dynamicCategories = [...new Set((products ?? []).map(p => p.category))];
-  const categories = [...new Set([...PRODUCT_CATEGORIES, ...dynamicCategories])];
 
   const qty = parseInt(form.quantity) || 0;
   const productTotal = selectedProduct ? qty * Number(selectedProduct.price) : 0;

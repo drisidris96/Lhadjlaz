@@ -5,6 +5,7 @@ import ordersRouter from "./orders";
 import adminRouter from "./admin";
 import storageRouter from "./storage";
 import dhdRouter from "./dhd";
+import categoriesRouter from "./categories";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(ordersRouter);
 router.use(adminRouter);
 router.use(storageRouter);
 router.use(dhdRouter);
+router.use(categoriesRouter);
 
 export default router;

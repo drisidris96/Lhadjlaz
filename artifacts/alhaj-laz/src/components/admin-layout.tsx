@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import {
   Package, ShoppingBag, LayoutDashboard, LogOut, ListChecks,
-  Store, Truck, RefreshCw, Banknote, BarChart2, Users, Warehouse,
+  Store, Truck, RefreshCw, Banknote, BarChart2, Users, Warehouse, Tag,
 } from "lucide-react";
 import { useAdminLogout } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ const NAV = [
   { href: "/admin/reports",    label: "التقارير",        icon: BarChart2 },
   { href: "/admin/customers",  label: "الزبائن",         icon: Users },
   { href: "/admin/products",   label: "المنتجات",        icon: Package },
+  { href: "/admin/categories", label: "الفئات",           icon: Tag },
   { href: "/admin/inventory",  label: "المخزون",         icon: Warehouse },
   { href: "/admin/orders",     label: "الطلبات",         icon: ShoppingBag },
   { href: "/admin/orders-list",label: "قائمة الطلبات",   icon: ListChecks },
