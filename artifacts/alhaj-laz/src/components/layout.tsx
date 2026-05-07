@@ -1,77 +1,86 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Search, Menu, X, User } from "lucide-react";
+import { Menu, X, Lock, Home, LayoutGrid, PackageSearch } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import logoUrl from "@assets/607425693_122184037190525400_7044830700338524128_n_1777454044692.jpg";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigation = [
-    { name: "الرئيسية", href: "/" },
-    { name: "المنتجات", href: "/products" },
+    { name: "الرئيسية", href: "/", icon: Home },
+    { name: "المنتجات", href: "/store", icon: LayoutGrid },
+    { name: "تتبع الطلبات", href: "/track", icon: PackageSearch },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/">
-              <div className="flex items-center gap-3 cursor-pointer">
-                <img
-                  src={logoUrl}
-                  alt="الحاج لاز"
-                  className="w-12 h-12 rounded-full object-cover bg-black ring-2 ring-primary/30"
-                />
-                <span className="font-bold text-2xl tracking-tight text-foreground">الحاج لاز</span>
-              </div>
-            </Link>
-            
-            <nav className="hidden md:flex items-center gap-6 mr-6">
-              {navigation.map((item) => (
-                <Link key={item.name} href={item.href}>
-                  <span className={`text-sm font-medium transition-colors cursor-pointer hover:text-primary ${location === item.href ? "text-primary" : "text-muted-foreground"}`}>
-                    {item.name}
-                  </span>
-                </Link>
-              ))}
-            </nav>
-          </div>
+    <div className="min-h-screen flex flex-col bg-background" dir="rtl">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-white shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
 
+          {/* Right — logo + name */}
+          <Link href="/">
+            <div className="flex items-center gap-2 cursor-pointer">
+              <span className="text-xl font-black text-primary tracking-wide">الحاج لاز</span>
+              <img
+                src="/logo.png"
+                alt="الحاج لاز"
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            </div>
+          </Link>
+
+          {/* Center — nav links (desktop) */}
+          <nav className="hidden sm:flex items-center gap-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const active = location === item.href;
+              return (
+                <Link key={item.href} href={item.href}>
+                  <button className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${active ? "bg-primary text-white shadow-sm" : "text-gray-600 hover:text-primary hover:bg-primary/5"}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{item.name}</span>
+                  </button>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Left — admin login + mobile menu */}
           <div className="flex items-center gap-2">
             <Link href="/admin/login">
-              <Button variant="ghost" size="icon" className="text-muted-foreground">
-                <User className="w-5 h-5" />
-              </Button>
+              <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-primary transition-colors border border-gray-200 hover:border-primary/40 rounded-full px-3 py-1.5">
+                <Lock className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">الإدارة</span>
+              </button>
             </Link>
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="md:hidden text-foreground"
+            <button
+              className="sm:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </Button>
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-border bg-background">
-            <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
-              {navigation.map((item) => (
-                <Link key={item.name} href={item.href}>
-                  <span 
-                    className={`block text-base font-medium transition-colors cursor-pointer ${location === item.href ? "text-primary" : "text-muted-foreground"}`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </span>
-                </Link>
-              ))}
+          <div className="sm:hidden border-t border-border bg-white">
+            <nav className="px-4 py-3 flex flex-col gap-1">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                const active = location === item.href;
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <button
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${active ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100"}`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {item.name}
+                    </button>
+                  </Link>
+                );
+              })}
             </nav>
           </div>
         )}
@@ -86,9 +95,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img
-                src={logoUrl}
+                src="/logo.png"
                 alt="الحاج لاز"
-                className="w-10 h-10 rounded-full object-cover bg-black"
+                className="w-10 h-10 rounded-full object-cover"
               />
               <span className="font-bold text-xl">الحاج لاز</span>
             </div>
