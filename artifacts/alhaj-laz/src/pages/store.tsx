@@ -98,12 +98,12 @@ export default function Store() {
       {/* ── Navbar ────────────────────────────────────────── */}
       <header className="bg-white border-b shadow-sm sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
-          {/* Left — admin login */}
-          <Link href="/admin/login">
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-primary transition-colors border border-gray-200 hover:border-primary/40 rounded-full px-3 py-1.5">
-              <Lock className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">الإدارة</span>
-            </button>
+          {/* Right — logo + name */}
+          <Link href="/">
+            <div className="flex items-center gap-2 cursor-pointer">
+              <span className="text-xl font-black text-primary tracking-wide">الحاج لاز</span>
+              <img src="/logo.png" alt="الحاج لاز" className="w-10 h-10 rounded-full object-cover" />
+            </div>
           </Link>
 
           {/* Center — nav links */}
@@ -128,12 +128,12 @@ export default function Store() {
             </Link>
           </nav>
 
-          {/* Right — logo + name */}
-          <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <span className="text-xl font-black text-primary tracking-wide">الحاج لاز</span>
-              <img src="/favicon.svg" alt="logo" className="w-9 h-9 rounded-lg shadow-sm" />
-            </div>
+          {/* Left — admin login */}
+          <Link href="/admin/login">
+            <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-primary transition-colors border border-gray-200 hover:border-primary/40 rounded-full px-3 py-1.5">
+              <Lock className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">الإدارة</span>
+            </button>
           </Link>
         </div>
       </header>
