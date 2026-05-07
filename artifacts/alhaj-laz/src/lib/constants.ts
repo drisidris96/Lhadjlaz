@@ -1843,3 +1843,12 @@ export const DHD_PRICES: Record<string, { home: number; stopDesk: number }> = {
   "عين صالح":        { home: 1300, stopDesk: 600 },
   "عين قزام":        { home: 1300, stopDesk: 0   },
 };
+
+export const PRODUCT_CATEGORIES = [
+  "قمصان",
+  "بناطيل",
+  "فساتين",
+  "جاكيتات",
+  "عبايات",
+  "ملابس داخلية",
+];

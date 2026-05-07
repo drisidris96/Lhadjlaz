@@ -11,7 +11,7 @@ import {
   ArrowRight, LayoutGrid, PackageSearch, Lock,
 } from "lucide-react";
 import { Link } from "wouter";
-import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT, DHD_PRICES, DHD_OFFICES } from "@/lib/constants";
+import { ALGERIAN_WILAYAS, ALGERIAN_BALADIYAT, DHD_PRICES, DHD_OFFICES, PRODUCT_CATEGORIES } from "@/lib/constants";
 import type { Product } from "@workspace/api-client-react";
 
 type DeliveryType = "home" | "stop_desk";
@@ -44,7 +44,8 @@ export default function Store() {
     : null;
   const office = form.deliveryType === "stop_desk" && form.wilaya ? DHD_OFFICES[form.wilaya] : null;
   const communes: string[] = form.wilaya && form.deliveryType === "home" ? (ALGERIAN_BALADIYAT[form.wilaya] ?? []) : [];
-  const categories = [...new Set((products ?? []).map(p => p.category))];
+  const dynamicCategories = [...new Set((products ?? []).map(p => p.category))];
+  const categories = [...new Set([...PRODUCT_CATEGORIES, ...dynamicCategories])];
 
   const qty = parseInt(form.quantity) || 0;
   const productTotal = selectedProduct ? qty * Number(selectedProduct.price) : 0;

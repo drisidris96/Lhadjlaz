@@ -28,6 +28,8 @@ import { useDebounce } from "@/hooks/use-debounce";
 import type { Product } from "@workspace/api-client-react/generated";
 import { useUpload } from "@workspace/object-storage-web";
 import { useRef } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PRODUCT_CATEGORIES } from "@/lib/constants";
 
 const productSchema = z.object({
   name: z.string().min(2, "اسم المنتج مطلوب"),
@@ -226,9 +228,18 @@ export default function AdminProducts() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>التصنيف</FormLabel>
-                          <FormControl>
-                            <Input placeholder="ألبسة رجالية..." {...field} />
-                          </FormControl>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر الفئة..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {PRODUCT_CATEGORIES.map(cat => (
+                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -379,9 +390,18 @@ export default function AdminProducts() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>التصنيف</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر الفئة..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PRODUCT_CATEGORIES.map(cat => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
