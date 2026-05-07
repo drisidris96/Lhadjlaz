@@ -150,13 +150,12 @@ export default function AdminCategories() {
                   <div
                     key={cat.id}
                     onClick={() => handleRowClick(cat)}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 cursor-pointer select-none
-                      ${editingId === cat.id
-                        ? "border-yellow-400/60 bg-white cursor-default"
-                        : selectedId === cat.id
-                          ? "border-orange-400 bg-orange-50 shadow-md"
-                          : "bg-white hover:bg-yellow-50 border-yellow-200"
-                      }`}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 cursor-pointer select-none"
+                    style={{
+                      backgroundColor: editingId === cat.id ? "#ffffff" : selectedId === cat.id ? "#fff7ed" : "#ffffff",
+                      borderColor: editingId === cat.id ? "#facc15" : selectedId === cat.id ? "#fb923c" : "#fde68a",
+                      boxShadow: selectedId === cat.id ? "0 4px 12px rgba(251,146,60,0.25)" : "none",
+                    }}
                   >
                     {editingId === cat.id ? (
                       <>
@@ -178,7 +177,7 @@ export default function AdminCategories() {
                       </>
                     ) : (
                       <>
-                        <span className="flex-1 font-semibold text-yellow-600">{cat.name}</span>
+                        <span className="flex-1 font-semibold" style={{ color: "#ca8a04" }}>{cat.name}</span>
 
                         {selectedId === cat.id && (
                           <button
