@@ -51,13 +51,33 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <NotificationBell />
         </div>
 
+        <style>{`
+          @keyframes nav-icon-bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25%      { transform: translateY(-3px) rotate(-8deg); }
+            50%      { transform: translateY(0) rotate(0deg); }
+            75%      { transform: translateY(-2px) rotate(8deg); }
+          }
+          @keyframes nav-icon-glow {
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(255,255,255,0.6)); }
+            50%      { filter: drop-shadow(0 0 6px rgba(250,204,21,0.9)); }
+          }
+          .nav-icon-anim {
+            animation: nav-icon-bounce 2.4s ease-in-out infinite,
+                       nav-icon-glow   2.4s ease-in-out infinite;
+            transform-origin: center;
+          }
+          .nav-item:hover .nav-icon-anim {
+            animation-duration: 0.8s;
+          }
+        `}</style>
         <nav className="px-4 py-2 space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = location === href;
             return (
               <Link key={href} href={href}>
                 <div
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
+                  className="nav-item flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
                   style={{
                     backgroundColor: "transparent",
                     color: "#ffffff",
@@ -65,7 +85,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     fontWeight: 600,
                   }}
                 >
-                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#ffffff" }} />
+                  <Icon className="nav-icon-anim w-4 h-4 flex-shrink-0" style={{ color: "#ffffff" }} />
                   <span className="flex-1">{label}</span>
                   {active && (
                     <span
@@ -92,7 +112,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               return (
                 <Link key={href} href={href}>
                   <div
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
+                    className="nav-item flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
                     style={{
                       backgroundColor: "transparent",
                       color: "#ffffff",
@@ -100,7 +120,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                       fontWeight: 600,
                     }}
                   >
-                    <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#ffffff" }} />
+                    <Icon className="nav-icon-anim w-4 h-4 flex-shrink-0" style={{ color: "#ffffff" }} />
                     <span className="flex-1">{label}</span>
                     {active && (
                       <span
