@@ -105,7 +105,7 @@ export default function ProductDetail() {
               
               <div className="flex items-center gap-3 text-sm text-muted-foreground bg-muted p-4 rounded-xl mb-8">
                 <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
-                <p>يضمن <span className="font-bold text-foreground">الحاج لاز</span> جودة المنتجات وتطابقها مع المواصفات المذكورة.</p>
+                <p>يضمن <span className="font-bold text-foreground">متجر الفخامة</span> جودة المنتجات وتطابقها مع المواصفات المذكورة.</p>
               </div>
               
               <div className="mt-auto pt-6 border-t border-border">

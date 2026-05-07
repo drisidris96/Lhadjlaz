@@ -94,7 +94,7 @@ export default function OrderPage() {
             </div>
             <div>
               <h2 className="text-3xl font-black text-gray-900">تم استلام طلبيتك!</h2>
-              <p className="text-gray-500 mt-1">شكراً لثقتك في الحاج لاز</p>
+              <p className="text-gray-500 mt-1">شكراً لثقتك في متجر الفخامة</p>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-5 px-6">
               <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">رقم الطلبية</p>

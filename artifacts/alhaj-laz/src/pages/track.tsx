@@ -130,7 +130,7 @@ export default function TrackOrder() {
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
-            <span className="text-xl font-black text-primary cursor-pointer">الحاج لاز</span>
+            <span className="text-xl font-black text-primary cursor-pointer">متجر الفخامة</span>
           </Link>
           <Link href="/products">
             <Button variant="ghost" size="sm" className="gap-1">

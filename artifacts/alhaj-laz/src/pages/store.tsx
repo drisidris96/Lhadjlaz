@@ -102,8 +102,8 @@ export default function Store() {
           {/* Right — logo + name */}
           <Link href="/">
             <div className="flex items-center gap-2.5 cursor-pointer">
-              <img src="/logo-orig.jpg" alt="الحاج لاز" className="w-12 h-12 rounded-full object-cover shadow" />
-              <span className="text-xl font-black text-primary tracking-wide">الحاج لاز</span>
+              <img src="/logo-orig.jpg" alt="متجر الفخامة" className="w-12 h-12 rounded-full object-cover shadow" />
+              <span className="text-xl font-black text-primary tracking-wide">متجر الفخامة</span>
             </div>
           </Link>
 
@@ -154,7 +154,7 @@ export default function Store() {
             </div>
             <div className="text-right">
               <p className="text-white/80 text-xs">المورد الأول لتجار الملابس في الجزائر 🇩🇿</p>
-              <h1 className="text-xl font-black leading-tight mt-0.5">اطلب ونوصل لكل الولايات</h1>
+              <h1 className="text-xl font-black leading-tight mt-0.5">الأناقة تصلك أينما كنت في الجزائر ✨</h1>
             </div>
           </div>
         </div>
@@ -464,7 +464,7 @@ export default function Store() {
               <CheckCircle2 className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-2xl font-black text-white">تم استلام طلبيتك!</h2>
-            <p className="text-white/70 text-sm mt-1">شكراً لثقتك في الحاج لاز</p>
+            <p className="text-white/70 text-sm mt-1">شكراً لثقتك في متجر الفخامة</p>
           </div>
 
           <div className="p-5 space-y-4 bg-white">

@@ -35,7 +35,7 @@ export function NotificationBell() {
       });
 
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("الحاج لاز — طلبية جديدة!", {
+        new Notification("متجر الفخامة — طلبية جديدة!", {
           body: newOrders.length === 1 ? `${newOrders[0].firstName} — ${newOrders[0].productName}` : `${newOrders.length} طلبيات جديدة`,
           icon: "/favicon.ico",
         });

@@ -25,7 +25,7 @@ export default function Home() {
             المورد الأول لتجار الملابس في الجزائر
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-foreground leading-tight mb-6">
-            تسوق بكل ثقة من <span className="text-primary">الحاج لاز</span>
+            تسوق بكل ثقة من <span className="text-primary">متجر الفخامة</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
             نوفر لك أفضل تشكيلات الملابس بجودة عالية وأسعار منافسة. اطلب الآن ونصلك إلى أي ولاية في الجزائر.
