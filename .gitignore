@@ -2,6 +2,8 @@
 
 # compiled output
 dist
+!artifacts/alhaj-laz/dist/
+!artifacts/alhaj-laz/dist/**
 tmp
 out-tsc
 *.tsbuildinfo
