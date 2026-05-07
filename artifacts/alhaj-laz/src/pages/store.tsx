@@ -145,7 +145,7 @@ export default function Store() {
         style={{ backgroundImage: "url('/hero-bg.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}
       >
         <div className="absolute inset-0 bg-black/55" />
-        <div className="relative max-w-5xl mx-auto px-4 pt-5 pb-5">
+        <div className="relative max-w-5xl mx-auto px-4 pt-10 pb-10">
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
