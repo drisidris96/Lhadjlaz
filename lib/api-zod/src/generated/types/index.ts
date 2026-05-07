@@ -9,6 +9,8 @@
 export * from "./adminLoginBody";
 export * from "./adminLoginResponse";
 export * from "./adminSession";
+export * from "./category";
+export * from "./createCategoryBody";
 export * from "./createOrderBody";
 export * from "./createProductBody";
 export * from "./errorEnvelope";
@@ -19,6 +21,7 @@ export * from "./importTrackingResponse";
 export * from "./listProductsParams";
 export * from "./order";
 export * from "./orderStatus";
+export * from "./orderTrackResponse";
 export * from "./product";
 export * from "./storeStats";
 export * from "./syncDhdStatusesBody";

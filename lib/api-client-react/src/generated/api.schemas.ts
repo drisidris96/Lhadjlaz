@@ -212,6 +212,16 @@ export interface OrderTrackResponse {
   firstName?: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  createdAt: string;
+}
+
+export interface CreateCategoryBody {
+  name: string;
+}
+
 export interface StoreStats {
   totalProducts: number;
   totalOrders: number;

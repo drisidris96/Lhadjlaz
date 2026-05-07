@@ -144,7 +144,28 @@ export const CreateOrderBody = zod.object({
   wilaya: zod.string().optional(),
   productId: zod.number(),
   quantity: zod.number(),
+  deliveryPrice: zod
+    .number()
+    .optional()
+    .describe("Delivery cost in DZD (DHD tariff from Mascara)"),
   notes: zod.string().optional(),
+});
+
+/**
+ * @summary Track an order by ID (public, no auth)
+ */
+export const TrackOrderParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const TrackOrderResponse = zod.object({
+  id: zod.number(),
+  status: zod.string(),
+  productName: zod.string(),
+  trackingNumber: zod.string().optional(),
+  createdAt: zod.string(),
+  wilaya: zod.string().optional(),
+  firstName: zod.string().optional(),
 });
 
 /**
@@ -327,6 +348,47 @@ export const GetPublicObjectParams = zod.object({
  */
 export const GetStorageObjectParams = zod.object({
   objectPath: zod.coerce.string(),
+});
+
+/**
+ * @summary List all categories
+ */
+export const ListCategoriesResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  createdAt: zod.string(),
+});
+export const ListCategoriesResponse = zod.array(ListCategoriesResponseItem);
+
+/**
+ * @summary Create a new category (admin only)
+ */
+export const CreateCategoryBody = zod.object({
+  name: zod.string(),
+});
+
+/**
+ * @summary Update a category (admin only)
+ */
+export const UpdateCategoryParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateCategoryBody = zod.object({
+  name: zod.string(),
+});
+
+export const UpdateCategoryResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  createdAt: zod.string(),
+});
+
+/**
+ * @summary Delete a category (admin only)
+ */
+export const DeleteCategoryParams = zod.object({
+  id: zod.coerce.number(),
 });
 
 /**
