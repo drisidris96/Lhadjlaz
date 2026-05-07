@@ -43,7 +43,12 @@ export default function AdminCategories() {
 
   const create = useCreateCategory({
     mutation: {
-      onSuccess: () => { toast({ title: "تمت إضافة الفئة ✅" }); setNewName(""); setShowAdd(false); invalidate(); },
+      onSuccess: () => {
+        toast({ title: "تمت إضافة الفئة ✅" });
+        setNewName("");
+        invalidate();
+        setTimeout(() => addInputRef.current?.focus(), 50);
+      },
       onError: () => toast({ title: "الفئة موجودة مسبقاً", variant: "destructive" }),
     },
   });
