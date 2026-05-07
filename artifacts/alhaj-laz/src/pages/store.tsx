@@ -128,9 +128,12 @@ export default function Store() {
             </Link>
           </nav>
 
-          {/* Right — logo */}
+          {/* Right — logo + name */}
           <Link href="/">
-            <span className="text-xl font-black text-primary tracking-wide cursor-pointer">الحاج لاز</span>
+            <div className="flex items-center gap-2 cursor-pointer">
+              <span className="text-xl font-black text-primary tracking-wide">الحاج لاز</span>
+              <img src="/favicon.svg" alt="logo" className="w-9 h-9 rounded-lg shadow-sm" />
+            </div>
           </Link>
         </div>
       </header>
