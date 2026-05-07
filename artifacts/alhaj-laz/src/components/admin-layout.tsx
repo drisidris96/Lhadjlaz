@@ -51,33 +51,67 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <NotificationBell />
         </div>
 
-        <nav className="px-4 py-2 space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
-          {NAV.map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href}>
-              <div className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors cursor-pointer text-sm ${
-                location === href
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-              }`}>
-                <Icon className="w-4 h-4 flex-shrink-0" />
-                <span>{label}</span>
-              </div>
-            </Link>
-          ))}
+        <nav className="px-4 py-2 space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]">
+          {NAV.map(({ href, label, icon: Icon }) => {
+            const active = location === href;
+            return (
+              <Link key={href} href={href}>
+                <div
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    color: "#ca8a04",
+                    border: active ? "2px solid #ca8a04" : "1px solid #fde68a",
+                    boxShadow: active ? "0 2px 8px rgba(202,138,4,0.35)" : "0 1px 3px rgba(0,0,0,0.08)",
+                    fontWeight: 600,
+                  }}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#ca8a04" }} />
+                  <span className="flex-1">{label}</span>
+                  <span
+                    style={{
+                      width: 22, height: 22, borderRadius: 6,
+                      background: "linear-gradient(135deg,#fde047,#facc15)",
+                      boxShadow: "0 0 6px rgba(250,204,21,0.7)",
+                      display: "inline-block",
+                      flexShrink: 0,
+                    }}
+                  />
+                </div>
+              </Link>
+            );
+          })}
 
-          <div className="pt-2 mt-2 border-t border-sidebar-border/50 space-y-1">
-            <Link href="/store">
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors cursor-pointer text-sm text-sidebar-foreground hover:bg-sidebar-accent/50">
-                <Store className="w-4 h-4" />
-                <span>المتجر</span>
-              </div>
-            </Link>
-            <Link href="/track">
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors cursor-pointer text-sm text-sidebar-foreground hover:bg-sidebar-accent/50">
-                <Truck className="w-4 h-4" />
-                <span>تتبع الطلبية</span>
-              </div>
-            </Link>
+          <div className="pt-2 mt-2 border-t border-sidebar-border/50 space-y-2">
+            {[
+              { href: "/store", label: "المتجر", Icon: Store },
+              { href: "/track", label: "تتبع الطلبية", Icon: Truck },
+            ].map(({ href, label, Icon }) => (
+              <Link key={href} href={href}>
+                <div
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    color: "#ca8a04",
+                    border: "1px solid #fde68a",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                    fontWeight: 600,
+                  }}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#ca8a04" }} />
+                  <span className="flex-1">{label}</span>
+                  <span
+                    style={{
+                      width: 22, height: 22, borderRadius: 6,
+                      background: "linear-gradient(135deg,#fde047,#facc15)",
+                      boxShadow: "0 0 6px rgba(250,204,21,0.7)",
+                      display: "inline-block",
+                      flexShrink: 0,
+                    }}
+                  />
+                </div>
+              </Link>
+            ))}
           </div>
         </nav>
 
