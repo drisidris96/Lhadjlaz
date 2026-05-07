@@ -127,7 +127,7 @@ export default function AdminCategories() {
                 </div>
               ) : (
                 categories.map((cat) => (
-                  <div key={cat.id} className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors ${editingId === cat.id ? "border-primary/40 bg-primary/5" : "bg-background hover:bg-muted/40"}`}>
+                  <div key={cat.id} className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors ${editingId === cat.id ? "border-yellow-400/60 bg-white" : "bg-white hover:bg-yellow-50 border-yellow-200"}`}>
                     {editingId === cat.id ? (
                       <>
                         <Input
@@ -147,7 +147,7 @@ export default function AdminCategories() {
                       </>
                     ) : (
                       <>
-                        <span className="flex-1 font-semibold text-foreground">{cat.name}</span>
+                        <span className="flex-1 font-semibold text-yellow-600">{cat.name}</span>
                         <Button variant="ghost" size="sm" className="gap-1 text-primary hover:bg-primary/10" onClick={() => startEdit(cat)}>
                           <Pencil className="w-4 h-4" />
                           تعديل
