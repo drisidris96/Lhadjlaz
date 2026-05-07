@@ -149,12 +149,11 @@ export default function AdminCategories() {
                 categories.map((cat) => (
                   <div
                     key={cat.id}
-                    onClick={() => handleRowClick(cat)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 cursor-pointer select-none"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl select-none"
                     style={{
-                      backgroundColor: editingId === cat.id ? "#ffffff" : selectedId === cat.id ? "#fff7ed" : "#ffffff",
-                      borderColor: editingId === cat.id ? "#facc15" : selectedId === cat.id ? "#fb923c" : "#fde68a",
-                      boxShadow: selectedId === cat.id ? "0 4px 12px rgba(251,146,60,0.25)" : "none",
+                      backgroundColor: "#ffffff",
+                      border: editingId === cat.id ? "2px solid #facc15" : "2px solid #fde68a",
+                      boxShadow: "0 4px 14px rgba(202,138,4,0.18)",
                     }}
                   >
                     {editingId === cat.id ? (
@@ -179,17 +178,14 @@ export default function AdminCategories() {
                       <>
                         <span className="flex-1 font-semibold" style={{ color: "#ca8a04" }}>{cat.name}</span>
 
-                        {selectedId === cat.id && (
-                          <button
-                            key={cat.id + "-orange"}
-                            className="btn-orange-animated flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-sm font-bold"
-                            style={{ background: "linear-gradient(135deg,#f97316,#ea580c)" }}
-                            onClick={e => { e.stopPropagation(); startEdit(cat); }}
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                            تعديل
-                          </button>
-                        )}
+                        <button
+                          className="btn-orange-animated flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-sm font-bold"
+                          style={{ background: "linear-gradient(135deg,#f97316,#ea580c)" }}
+                          onClick={() => startEdit(cat)}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          تعديل
+                        </button>
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
