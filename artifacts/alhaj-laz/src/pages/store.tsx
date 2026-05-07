@@ -101,8 +101,8 @@ export default function Store() {
           {/* Right — logo + name */}
           <Link href="/">
             <div className="flex items-center gap-2.5 cursor-pointer">
+              <img src="/logo-orig.jpg" alt="الحاج لاز" className="w-12 h-12 rounded-full object-cover shadow" />
               <span className="text-xl font-black text-primary tracking-wide">الحاج لاز</span>
-              <img src="/logo.png" alt="الحاج لاز" className="w-12 h-12 rounded-full object-cover shadow" />
             </div>
           </Link>
 
