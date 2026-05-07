@@ -102,7 +102,7 @@ export default function Store() {
           {/* Right — logo + name */}
           <Link href="/">
             <div className="flex items-center gap-2.5 cursor-pointer">
-              <img src="/logo-orig.jpg" alt="متجر الفخامة" className="w-12 h-12 rounded-full object-cover shadow" />
+              <img src="/logo-new.jpg" alt="متجر الفخامة" className="w-12 h-12 rounded-full object-cover shadow" />
               <span className="text-xl font-black text-primary tracking-wide">متجر الفخامة</span>
             </div>
           </Link>
@@ -140,8 +140,12 @@ export default function Store() {
       </header>
 
       {/* ── Hero Banner ───────────────────────────────────── */}
-      <div className="bg-gradient-to-l from-purple-900 via-primary to-violet-600 text-white">
-        <div className="max-w-5xl mx-auto px-4 pt-5 pb-5">
+      <div
+        className="relative text-white overflow-hidden"
+        style={{ backgroundImage: "url('/hero-bg.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}
+      >
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="relative max-w-5xl mx-auto px-4 pt-5 pb-5">
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

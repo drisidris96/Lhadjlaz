@@ -22,7 +22,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2 cursor-pointer">
               <span className="text-xl font-black text-primary tracking-wide">متجر الفخامة</span>
               <img
-                src="/logo-orig.jpg"
+                src="/logo-new.jpg"
                 alt="متجر الفخامة"
                 className="w-10 h-10 rounded-full object-cover"
               />
@@ -95,7 +95,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img
-                src="/logo-orig.jpg"
+                src="/logo-new.jpg"
                 alt="متجر الفخامة"
                 className="w-10 h-10 rounded-full object-cover"
               />
