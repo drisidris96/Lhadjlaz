@@ -153,7 +153,7 @@ export default function Store() {
             </div>
             <div className="text-right">
               <p className="text-white/80 text-xs">المورد الأول لتجار الملابس في الجزائر 🇩🇿</p>
-              <h1 className="text-xl font-black leading-tight mt-0.5">اطلب بالجملة ونوصل لكل الولايات</h1>
+              <h1 className="text-xl font-black leading-tight mt-0.5">اطلب ونوصل لكل الولايات</h1>
             </div>
           </div>
         </div>
