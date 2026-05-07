@@ -97,12 +97,12 @@ export default function Store() {
 
       {/* ── Navbar ────────────────────────────────────────── */}
       <header className="bg-white border-b shadow-sm sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           {/* Right — logo + name */}
           <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
+            <div className="flex items-center gap-2.5 cursor-pointer">
               <span className="text-xl font-black text-primary tracking-wide">الحاج لاز</span>
-              <img src="/logo.png" alt="الحاج لاز" className="w-10 h-10 rounded-full object-cover" />
+              <img src="/logo.png" alt="الحاج لاز" className="w-12 h-12 rounded-full object-cover shadow" />
             </div>
           </Link>
 
@@ -139,7 +139,7 @@ export default function Store() {
       </header>
 
       {/* ── Hero Banner ───────────────────────────────────── */}
-      <div className="bg-gradient-to-l from-yellow-600 via-primary to-amber-500 text-white">
+      <div className="bg-gradient-to-l from-purple-900 via-primary to-violet-600 text-white">
         <div className="max-w-5xl mx-auto px-4 pt-5 pb-5">
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1 max-w-sm">
