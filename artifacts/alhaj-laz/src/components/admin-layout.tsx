@@ -60,22 +60,24 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
                   style={{
                     backgroundColor: "transparent",
-                    color: "#ca8a04",
+                    color: "#ffffff",
                     border: active ? "1px solid #ffffff" : "1px solid rgba(255,255,255,0.6)",
                     fontWeight: 600,
                   }}
                 >
-                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#ca8a04" }} />
+                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#ffffff" }} />
                   <span className="flex-1">{label}</span>
-                  <span
-                    style={{
-                      width: 10, height: 10, borderRadius: "50%",
-                      background: "linear-gradient(135deg,#fde047,#facc15)",
-                      boxShadow: "0 0 4px rgba(250,204,21,0.8)",
-                      display: "inline-block",
-                      flexShrink: 0,
-                    }}
-                  />
+                  {active && (
+                    <span
+                      style={{
+                        width: 10, height: 10, borderRadius: "50%",
+                        background: "linear-gradient(135deg,#fde047,#facc15)",
+                        boxShadow: "0 0 4px rgba(250,204,21,0.8)",
+                        display: "inline-block",
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
                 </div>
               </Link>
             );
@@ -85,31 +87,36 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             {[
               { href: "/store", label: "المتجر", Icon: Store },
               { href: "/track", label: "تتبع الطلبية", Icon: Truck },
-            ].map(({ href, label, Icon }) => (
-              <Link key={href} href={href}>
-                <div
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: "#ca8a04",
-                    border: "1px solid rgba(255,255,255,0.6)",
-                    fontWeight: 600,
-                  }}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#ca8a04" }} />
-                  <span className="flex-1">{label}</span>
-                  <span
+            ].map(({ href, label, Icon }) => {
+              const active = location === href;
+              return (
+                <Link key={href} href={href}>
+                  <div
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition-all"
                     style={{
-                      width: 10, height: 10, borderRadius: "50%",
-                      background: "linear-gradient(135deg,#fde047,#facc15)",
-                      boxShadow: "0 0 4px rgba(250,204,21,0.8)",
-                      display: "inline-block",
-                      flexShrink: 0,
+                      backgroundColor: "transparent",
+                      color: "#ffffff",
+                      border: active ? "1px solid #ffffff" : "1px solid rgba(255,255,255,0.6)",
+                      fontWeight: 600,
                     }}
-                  />
-                </div>
-              </Link>
-            ))}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#ffffff" }} />
+                    <span className="flex-1">{label}</span>
+                    {active && (
+                      <span
+                        style={{
+                          width: 10, height: 10, borderRadius: "50%",
+                          background: "linear-gradient(135deg,#fde047,#facc15)",
+                          boxShadow: "0 0 4px rgba(250,204,21,0.8)",
+                          display: "inline-block",
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </nav>
 
